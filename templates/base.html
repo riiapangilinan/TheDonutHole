@@ -13,6 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Forum&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/cart.css">
 
   {% block preload %}{% endblock %}
 </head>
@@ -106,13 +107,13 @@
 
         <ul class="navbar-list">
           <li class="navbar-item">
-              <a href="{{ url_for('home') }}#home" class="navbar-link hover-underline {% if request.path == '/' %}active{% endif %}">
+              <a href="{{ url_for('home') }}" class="navbar-link hover-underline {% if request.path == '/' %}active{% endif %}">
                   <div class="separator"></div>
                   <span class="span">Home</span>
               </a>
           </li>
           <li class="navbar-item">
-              <a href="{{ url_for('home') }}#menu" class="navbar-link hover-underline {% if request.path == '/' %}active{% endif %}">
+              <a href="{{ url_for('menu') }}" class="navbar-link hover-underline {% if request.path == '/' %}active{% endif %}">
                   <div class="separator"></div>
                   <span class="span">Menu</span>
               </a>
@@ -206,16 +207,16 @@
         </div>
         <ul class="footer-list">
           <li>
-            <a href="#" class="label-2 footer-link hover-underline">Home</a>
+            <a href="{{ url_for('home') }}" class="label-2 footer-link hover-underline">Home</a>
           </li>
           <li>
-            <a href="#" class="label-2 footer-link hover-underline">Menus</a>
+            <a href="{{ url_for('menu') }}" class="label-2 footer-link hover-underline">Menus</a>
           </li>
           <li>
-            <a href="#" class="label-2 footer-link hover-underline">About Us</a>
+            <a href="{{ url_for('about') }}" class="label-2 footer-link hover-underline">About Us</a>
           </li>
           <li>
-            <a href="#" class="label-2 footer-link hover-underline">Contact</a>
+            <a href="{{ url_for('contact') }}" class="label-2 footer-link hover-underline">Contact</a>
           </li>
         </ul>
         <ul class="footer-list">
@@ -244,13 +245,36 @@
     </div>
   </footer>
 
+  <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h3>Your Cart</h3>
+      <button class="close-cart">&times;</button>
+    </div>
+    <div class="cart-items" id="cartItems">
+    </div>
+    <div class="cart-footer">
+      <div class="cart-total">
+        <span>Total:</span>
+        <span id="cartTotal">₱0.00</span>
+      </div>
+      <button class="btn btn-primary" id="checkoutBtn">Checkout</button>
+    </div>
+  </div>
+  <div class="cart-overlay" id="cartOverlay"></div>
+
   <!-- BACK TO TOP -->
   <a href="#top" class="back-top-btn active" aria-label="back to top" data-back-top-btn>
     <ion-icon name="chevron-up" aria-hidden="true"></ion-icon>
   </a>
 
+  <div class="cart-icon" id="cartIcon">
+    <ion-icon name="cart-outline"></ion-icon>
+    <span class="cart-badge" id="cartBadge">0</span>
+  </div>
+
   <!-- SCRIPTS -->
   <script src="./assets/js/script.js"></script>
+  <script src="./assets/js/cart.js"></script>
   <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </body>
