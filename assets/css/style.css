@@ -173,6 +173,7 @@ address { font-style: normal; }
 html {
   font-size: 10px;
   scroll-behavior: smooth;
+  height: 100%;
 }
 
 body {
@@ -183,8 +184,9 @@ body {
   font-weight: var(--weight-regular);
   line-height: var(--lineHeight-5);
   overflow: hidden;
-  height: 300vh;
+  height: 100%;
 }
+
 
 body.loaded { overflow: overlay; }
 
@@ -280,25 +282,27 @@ body.nav-active { overflow: hidden; }
   margin-inline: auto;
 }
 
-.hover-underline {
+.hover-underline-inline {
+  display: inline;
   position: relative;
-  max-width: max-content;
 }
 
-.hover-underline::after {
+.hover-underline-inline::after {
   content: "";
   position: absolute;
   left: 0;
-  bottom: 0;
+  bottom: -3px;
   width: 100%;
   height: 5px;
-  border-block: 1px solid var(--gold-crayola);
+  border-top: 1px solid var(--gold-crayola);
+  border-bottom: 1px solid var(--gold-crayola);
   transform: scaleX(0.2);
   opacity: 0;
   transition: var(--transition-2);
 }
 
-.hover-underline:is(:hover, :focus-visible)::after {
+.hover-underline-inline:hover::after,
+.hover-underline-inline:focus-visible::after {
   transform: scaleX(1);
   opacity: 1;
 }
@@ -2140,4 +2144,38 @@ textarea.input-field {
     left: 0;
   }
 
+}
+
+
+
+
+
+
+
+
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.auth-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 20px;
 }
