@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block preload %}
+  <link rel="preload" as="image" href="./assets/images/contact-banner.jpg">
+{% endblock %}
+
+{% block content %}
+    <article>
+
+      <!-- 
+        - #HERO
+      -->
+
+      <section class="hero text-center" aria-label="home" id="home">
+        <div class="slider-bg">
+          <img src="./assets/images/contact-banner.jpg" width="1880" height="950" alt="" class="img-cover">
+        </div>
+
+        <h1 class="display-1 hero-title slider-reveal">
+          Get In Touch
+        </h1>
+
+        <p class="body-2 hero-text slider-reveal">
+          We'd love to hear from you! Reach out for inquiries, feedback, or just to say hello.
+        </p>
+
+        <a href="#contact-form" class="btn btn-primary slider-reveal">
+          <span class="text text-1">Contact Us</span>
+          <span class="text text-2" aria-hidden="true">Contact Us</span>
+        </a>
+
+      </section>
+
+      <!-- 
+        - #CONTACT INFO
+      -->
+
+    <section class="section service bg-black-10 text-center" aria-label="service">
+        <div class="container">
+
+            <p class="section-subtitle label-2">How To Reach Us</p>
+
+            <h2 class="headline-1 section-title">Contact Information</h2>
+
+            <ul class="grid-list">
+
+            <li>
+                <div class="service-card" style="padding: 30px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+
+                <div class="card-icon" style="margin-bottom: 20px;">
+                    <ion-icon name="location-outline" style="font-size: 4rem;"></ion-icon>
+                </div>
+
+                <div class="card-content">
+
+                    <h3 class="title-4 card-title">
+                    <a href="#">Our Location</a>
+                    </h3>
+
+                    <p class="body-4">
+                    2401 Taft Avenue, Malate<br>
+                    Manila, Philippines
+                    </p>
+
+                    <a href="#" class="btn-text hover-underline label-2">View on Map</a>
+
+                </div>
+
+                </div>
+            </li>
+
+            <li>
+                <div class="service-card" style="padding: 30px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+
+                <div class="card-icon" style="margin-bottom: 20px;">
+                    <ion-icon name="time-outline" style="font-size: 4rem;"></ion-icon>
+                </div>
+
+                <div class="card-content">
+
+                    <h3 class="title-4 card-title">
+                    <a href="#">Opening Hours</a>
+                    </h3>
+
+                    <p class="body-4">
+                    Monday - Sunday<br>
+                    9:00 AM - 9:00 PM
+                    </p>
+
+                    <p class="body-4" style="color: var(--gold-crayola); margin-top: 10px;">
+                    Closed on Holidays
+                    </p>
+
+                </div>
+
+                </div>
+            </li>
+
+            <li>
+                <div class="service-card" style="padding: 30px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+
+                <div class="card-icon" style="margin-bottom: 20px;">
+                    <ion-icon name="call-outline" style="font-size: 4rem;"></ion-icon>
+                </div>
+
+                <div class="card-content">
+
+                    <h3 class="title-4 card-title">
+                    <a href="#">Contact Details</a>
+                    </h3>
+
+                    <p class="body-4">
+                    Phone: +63 917 123 4567<br>
+                    Email: contact@thedonuthole.com
+                    </p>
+
+                    <a href="tel:+639171234567" class="btn-text hover-underline label-2">Call Now</a>
+
+                </div>
+
+                </div>
+            </li>
+
+            </ul>
+
+            <img src="./assets/images/shape-1.png" width="246" height="412" loading="lazy" alt="shape"
+            class="shape shape-1 move-anim">
+            <img src="./assets/images/shape-2.png" width="343" height="345" loading="lazy" alt="shape"
+            class="shape shape-2 move-anim">
+
+        </div>
+        </section>
+
+      <!-- 
+        - #CONTACT FORM
+      -->
+
+      <section class="section" id="contact-form" aria-labelledby="contact-label">
+        <div class="container">
+
+          <p class="section-subtitle text-center label-2">Send Us A Message</p>
+
+          <h2 class="headline-1 section-title text-center">Contact Form</h2>
+
+          <form class="contact-form" style="max-width: 800px; margin: 0 auto;">
+            <div class="input-wrapper" style="margin-bottom: 20px;">
+              <label for="name" class="label-2">Full Name *</label>
+              <input type="text" id="name" name="name" class="input-field" required>
+            </div>
+
+            <div class="input-wrapper" style="margin-bottom: 20px;">
+              <label for="email" class="label-2">Email Address *</label>
+              <input type="email" id="email" name="email" class="input-field" required>
+            </div>
+
+            <div class="input-wrapper" style="margin-bottom: 20px;">
+              <label for="phone" class="label-2">Phone Number</label>
+              <input type="tel" id="phone" name="phone" class="input-field">
+            </div>
+
+            <div class="input-wrapper" style="margin-bottom: 20px;">
+              <label for="subject" class="label-2">Subject *</label>
+              <input type="text" id="subject" name="subject" class="input-field" required>
+            </div>
+
+            <div class="input-wrapper" style="margin-bottom: 20px;">
+              <label for="message" class="label-2">Your Message *</label>
+              <textarea id="message" name="message" class="input-field" rows="6" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 20px;">
+              <span class="text text-1">Send Message</span>
+              <span class="text text-2" aria-hidden="true">Send Message</span>
+            </button>
+          </form>
+
+        </div>
+      </section>
+
+      <!-- 
+        - #MAP
+      -->
+
+      <section class="section bg-black-10" aria-label="map">
+        <div class="container">
+          <h2 class="headline-1 section-title text-center">Find Us</h2>
+          <div class="map-container" style="height: 500px; width: 100%;">
+            <!-- Embedded Google Map -->
+            <iframe 
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.758179414014!2d120.98373631531037!3d14.554999181835254!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c9f1a8a5f6e5%3A0x8a9b8f9b9b9b9b9b!2s2401%20Taft%20Ave%2C%20Malate%2C%20Manila%2C%201004%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1620000000000!5m2!1sen!2sph" 
+              width="100%" 
+              height="100%" 
+              style="border:0;" 
+              allowfullscreen="" 
+              loading="lazy">
+            </iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 
+        - #FAQ
+        -->
+
+     <section class="section" aria-label="faq">
+        <div class="container">
+
+            <p class="section-subtitle text-center label-2">Common Questions</p>
+
+            <h2 class="headline-1 section-title text-center" style="margin-bottom: 30px;">Frequently Asked Questions</h2>
+
+            <div class="faq-container" style="max-width: 800px; margin: 0 auto;">
+            <div class="faq-item" style="margin-bottom: 20px; border-bottom: 1px solid var(--white-alpha-10); padding-bottom: 20px;">
+                <h3 class="title-3" style="margin-bottom: 10px;">Do you offer gluten-free or vegan options?</h3>
+                <p class="body-4" style="color: var(--quick-silver);">
+                Yes! We have a selection of gluten-free and vegan donuts available daily. Please ask our staff for current options.
+                </p>
+            </div>
+
+            <div class="faq-item" style="margin-bottom: 20px; border-bottom: 1px solid var(--white-alpha-10); padding-bottom: 20px;">
+                <h3 class="title-3" style="margin-bottom: 10px;">Can I place a large order for an event?</h3>
+                <p class="body-4" style="color: var(--quick-silver);">
+                Absolutely! We cater for events large and small. Please contact us at least 72 hours in advance for orders over 50 donuts.
+                </p>
+            </div>
+
+            <div class="faq-item" style="margin-bottom: 20px; border-bottom: 1px solid var(--white-alpha-10); padding-bottom: 20px;">
+                <h3 class="title-3" style="margin-bottom: 10px;">Do you deliver?</h3>
+                <p class="body-4" style="color: var(--quick-silver);">
+                We offer delivery within Metro Manila through our website or via food delivery partners.
+                </p>
+            </div>
+
+            <div class="faq-item" style="margin-bottom: 20px;">
+                <h3 class="title-3" style="margin-bottom: 10px;">How long do your donuts stay fresh?</h3>
+                <p class="body-4" style="color: var(--quick-silver);">
+                Our donuts are best enjoyed the same day, but will stay fresh for up to 2 days when stored properly in an airtight container.
+                </p>
+            </div>
+            </div>
+
+        </div>
+        </section>
+    </article>
+{% endblock %}
