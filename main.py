@@ -47,14 +47,14 @@ menu_items = [
         'name': 'Fruit Punch Summer',
         'price': 70.00,
         'image': 'menu-5.png',
-        'description': 'A sun-kissed celebration of juicy strawberries, blueberries, and raspberries for the summer.'
+        'description': 'A celebration of juicy strawberries, blueberries, and raspberries for the summer.'
     },
     {
         'id': 6,
         'name': 'Bundles',
-        'price': 150.00,
+        'price': 370.00,
         'image': 'menu-6.png',
-        'description': 'Build-your-own boxes—perfect for gifting, parties, or treating yourself to a sweet sampler.'
+        'description': 'A sunshine-filled box with 2 classic Glazed + 4 of our hottest summer specialties.'
     }
 ]
 
