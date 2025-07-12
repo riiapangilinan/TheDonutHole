@@ -9,6 +9,21 @@
 {% block content %}
     <article>
 
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" id="flash-message">
+              {% if category == 'success' %}
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+              {% else %}
+                <ion-icon name="alert-circle-outline"></ion-icon>
+              {% endif %}
+              <div class="message-content">{{ message }}</div>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
       <!-- 
         - #HERO
       -->
@@ -312,7 +327,7 @@
           </div>
         </div>
 
-        <img src="./assets/images/shape-4.png" width="179" height="359" loading="lazy" alt="" class="shape shape-1">
+        <img src="./assets/images/shape-4.png" width="179" height="359" loading="lazy" alt="" class="shape shape-1 move-anim">
 
       </section>
 
@@ -336,8 +351,13 @@
             <li>
               <div class="menu-card hover:card">
 
-                <figure class="card-banner img-holder" style="--width: 100; --height: 100;">
-                  <img src="./assets/images/menu-1.png" width="100" height="100" loading="lazy" alt="Original Glazed"
+                <figure class="card-banner img-holder">
+                  <img src="./assets/images/menu-1.png" 
+                    width="104" 
+                    height="100" 
+                    style="width: 104px; height: 100px; object-fit: contain;"
+                    loading="lazy" 
+                    alt="Original Glazed" 
                     class="img-cover">
                 </figure>
 
@@ -354,7 +374,7 @@
                   </div>
 
                   <p class="card-text label-1">
-                    A timeless classic with a golden, melt-in-your-mouth glaze that’s perfectly sweet, fluffy.
+                    A timeless classic with a golden, melt-in-your-mouth glaze that's perfectly sweet, fluffy.
                   </p>
 
                 </div>
@@ -365,8 +385,13 @@
             <li>
               <div class="menu-card hover:card">
 
-                <figure class="card-banner img-holder" style="--width: 100; --height: 100;">
-                  <img src="./assets/images/menu-2.png" width="100" height="100" loading="lazy" alt="Hazelnut Drizzle"
+                <figure class="card-banner img-holder">
+                  <img src="./assets/images/menu-2.png" 
+                    width="104" 
+                    height="100" 
+                    style="width: 104px; height: 100px; object-fit: contain;"
+                    loading="lazy" 
+                    alt="Original Glazed" 
                     class="img-cover">
                 </figure>
 
@@ -392,8 +417,13 @@
             <li>
               <div class="menu-card hover:card">
 
-                <figure class="card-banner img-holder" style="--width: 100; --height: 100;">
-                  <img src="./assets/images/menu-3.png" width="100" height="100" loading="lazy" alt="Creme Brulee"
+                <figure class="card-banner img-holder">
+                  <img src="./assets/images/menu-3.png" 
+                    width="104" 
+                    height="100" 
+                    style="width: 104px; height: 100px; object-fit: contain;"
+                    loading="lazy" 
+                    alt="Original Glazed" 
                     class="img-cover">
                 </figure>
 
@@ -419,8 +449,13 @@
             <li>
               <div class="menu-card hover:card">
 
-                <figure class="card-banner img-holder" style="--width: 100; --height: 100;">
-                  <img src="./assets/images/menu-4.png" width="100" height="100" loading="lazy" alt="Orange Pistachio"
+                <figure class="card-banner img-holder">
+                  <img src="./assets/images/menu-4.png" 
+                    width="104" 
+                    height="100" 
+                    style="width: 104px; height: 100px; object-fit: contain;"
+                    loading="lazy" 
+                    alt="Original Glazed" 
                     class="img-cover">
                 </figure>
 
@@ -448,8 +483,13 @@
             <li>
               <div class="menu-card hover:card">
 
-                <figure class="card-banner img-holder" style="--width: 100; --height: 100;">
-                  <img src="./assets/images/menu-5.png" width="100" height="100" loading="lazy" alt="Fruit Punch Summer"
+                <figure class="card-banner img-holder">
+                  <img src="./assets/images/menu-5.png" 
+                    width="104" 
+                    height="100" 
+                    style="width: 104px; height: 100px; object-fit: contain;"
+                    loading="lazy" 
+                    alt="Original Glazed" 
                     class="img-cover">
                 </figure>
 
@@ -475,8 +515,13 @@
             <li>
               <div class="menu-card hover:card">
 
-                <figure class="card-banner img-holder" style="--width: 100; --height: 100;">
-                  <img src="./assets/images/menu-6.png" width="100" height="100" loading="lazy" alt="Bundles"
+                <figure class="card-banner img-holder">
+                  <img src="./assets/images/menu-6.png" 
+                    width="104" 
+                    height="100" 
+                    style="width: 104px; height: 100px; object-fit: contain;"
+                    loading="lazy" 
+                    alt="Original Glazed" 
                     class="img-cover">
                 </figure>
 

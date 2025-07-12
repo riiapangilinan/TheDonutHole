@@ -79,11 +79,9 @@ def add_to_cart():
     data = request.get_json()
     item_id = data.get('item_id')
     
-    # Find the item in the menu
     item = next((item for item in menu_items if item['id'] == item_id), None)
     
     if item:
-        # Check if item already in cart
         cart_item = next((i for i in session['cart'] if i['id'] == item_id), None)
         
         if cart_item:

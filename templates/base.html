@@ -113,7 +113,7 @@
               </a>
           </li>
           <li class="navbar-item">
-              <a href="{{ url_for('menu') }}" class="navbar-link hover-underline {% if request.path == '/' %}active{% endif %}">
+              <a href="{{ url_for('menu') }}" class="navbar-link hover-underline {% if request.path == '/menu' %}active{% endif %}">
                   <div class="separator"></div>
                   <span class="span">Menu</span>
               </a>
@@ -272,9 +272,27 @@
     <span class="cart-badge" id="cartBadge">0</span>
   </div>
 
+  <!-- CART SIDEBAR -->
+  <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h3>Your Cart</h3>
+      <button class="close-cart">&times;</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="cart-total">
+        <span>Total:</span>
+        <span id="cartTotal">₱0.00</span>
+      </div>
+      <button class="btn btn-primary" id="checkoutBtn">Checkout</button>
+    </div>
+  </div>
+  <div class="cart-overlay" id="cartOverlay"></div>
+
   <!-- SCRIPTS -->
   <script src="./assets/js/script.js"></script>
   <script src="./assets/js/cart.js"></script>
+  <script src="./assets/js/alert.js"></script>
   <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </body>

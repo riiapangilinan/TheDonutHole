@@ -10,8 +10,13 @@
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">
-              {{ message }}
+            <div class="alert alert-{{ category }}" id="flash-message">
+              {% if category == 'success' %}
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+              {% else %}
+                <ion-icon name="alert-circle-outline"></ion-icon>
+              {% endif %}
+              <div class="message-content">{{ message }}</div>
             </div>
           {% endfor %}
         {% endif %}

@@ -5,67 +5,89 @@
   <div class="container">
     <p class="section-subtitle text-center label-2">Special Selection</p>
     <h2 class="headline-1 section-title text-center">Our Delicious Menu</h2>
+  </div>
 
-    <ul class="grid-list">
-      {% for item in menu_items %}
-      <li>
-        <div class="menu-card hover:card">
-          <figure class="card-banner img-holder" style="--width: 100; --height: 100;">
-            <img src="{{ url_for('static', filename='images/' + item.image) }}" width="100" height="100" loading="lazy" alt="{{ item.name }}" class="img-cover">
-          </figure>
+  {% for item in menu_items %}
+  <section class="special-dish text-center" aria-labelledby="dish-label">
+    {% if loop.index % 2 == 1 %}
+      <!-- Odd items: image on left -->
+      <div class="special-dish-banner">
+        <img src="{{ url_for('static', filename='images/' + item.image) }}" width="940" height="900" loading="lazy" alt="{{ item.name }}" class="img-cover">
+      </div>
 
-          <div>
-            <div class="title-wrapper">
-              <h3 class="title-3">
-                <a href="#" class="card-title">{{ item.name }}</a>
-              </h3>
-              {% if item.id == 1 %}
-                <span class="badge label-1">Signature</span>
-              {% elif item.id == 4 %}
-                <span class="badge label-1">Featured</span>
-              {% endif %}
-              <span class="span title-2">₱{{ "%.2f"|format(item.price) }}</span>
-            </div>
+      <div class="special-dish-content bg-black-10">
+        <div class="container">
+          {% if loop.index == 4 %}
+            <img src="{{ url_for('static', filename='images/badge-1.png') }}" width="28" height="41" loading="lazy" alt="badge" class="abs-img">
+            <p class="section-subtitle label-2">Signature Dish</p>
+          {% endif %}
 
-            <p class="card-text label-1">
-              {{ item.description }}
-            </p>
+          <h2 class="headline-1 section-title">{{ item.name }}</h2>
 
-            {% if 'email' in session %}
-            <button class="btn btn-primary add-to-cart" data-id="{{ item.id }}" style="margin-top: 10px; width: 100%;">
-              <span class="text text-1">Add to Cart</span>
-              <span class="text text-2" aria-hidden="true">Add to Cart</span>
-            </button>
-            {% else %}
-            <a href="{{ url_for('login', next=url_for('menu')) }}" class="btn btn-primary" style="margin-top: 10px; width: 100%;">
-              <span class="text text-1">Login to Order</span>
-              <span class="text text-2" aria-hidden="true">Login to Order</span>
-            </a>
-            {% endif %}
+          <p class="section-text">
+            {{ item.description }}
+          </p>
+
+          <div class="wrapper">
+            <span class="span body-1">₱{{ "%.2f"|format(item.price) }}</span>
           </div>
-        </div>
-      </li>
-      {% endfor %}
-    </ul>
-  </div>
-</section>
 
-<!-- Cart Sidebar -->
-<div class="cart-sidebar" id="cartSidebar">
-  <div class="cart-header">
-    <h3>Your Cart</h3>
-    <button class="close-cart">&times;</button>
-  </div>
-  <div class="cart-items" id="cartItems">
-    <!-- Cart items will be dynamically inserted here -->
-  </div>
-  <div class="cart-footer">
-    <div class="cart-total">
-      <span>Total:</span>
-      <span id="cartTotal">₱0.00</span>
-    </div>
-    <button class="btn btn-primary" id="checkoutBtn">Checkout</button>
-  </div>
-</div>
-<div class="cart-overlay" id="cartOverlay"></div>
+          {% if 'email' in session %}
+          <button class="btn btn-primary add-to-cart" data-id="{{ item.id }}">
+            <span class="text text-1">Add to Cart</span>
+            <span class="text text-2" aria-hidden="true">Add to Cart</span>
+          </button>
+          {% else %}
+          <a href="{{ url_for('login', next=url_for('menu')) }}" class="btn btn-primary">
+            <span class="text text-1">Login to Order</span>
+            <span class="text text-2" aria-hidden="true">Login to Order</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      
+      <!-- Odd items: shape-2 on right -->
+      <img src="{{ url_for('static', filename='images/shape-2.png') }}" width="179" height="359" loading="lazy" alt="" class="shape shape-4 move-anim" style="right: 0; left: auto;">
+    {% else %}
+      <!-- Even items: shape-1 on left (moved further left) -->
+      <img src="{{ url_for('static', filename='images/shape-1.png') }}" width="179" height="359" loading="lazy" alt="" class="shape shape-1 move-anim" style="left: -110px; right: auto;">
+      
+      <!-- Even items: image on right -->
+      <div class="special-dish-content bg-black-10">
+        <div class="container">
+          {% if loop.index == 4 %}
+            <img src="{{ url_for('static', filename='images/badge-1.png') }}" width="28" height="41" loading="lazy" alt="badge" class="abs-img">
+            <p class="section-subtitle label-2">Signature Dish</p>
+          {% endif %}
+
+          <h2 class="headline-1 section-title">{{ item.name }}</h2>
+
+          <p class="section-text">
+            {{ item.description }}
+          </p>
+
+          <div class="wrapper">
+            <span class="span body-1">₱{{ "%.2f"|format(item.price) }}</span>
+          </div>
+
+          {% if 'email' in session %}
+          <button class="btn btn-primary add-to-cart" data-id="{{ item.id }}">
+            <span class="text text-1">Add to Cart</span>
+            <span class="text text-2" aria-hidden="true">Add to Cart</span>
+          </button>
+          {% else %}
+          <a href="{{ url_for('login', next=url_for('menu')) }}" class="btn btn-primary">
+            <span class="text text-1">Login to Order</span>
+            <span class="text text-2" aria-hidden="true">Login to Order</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="special-dish-banner">
+        <img src="{{ url_for('static', filename='images/' + item.image) }}" width="940" height="900" loading="lazy" alt="{{ item.name }}" class="img-cover">
+      </div>
+    {% endif %}
+  </section>
+  {% endfor %}
 {% endblock %}
