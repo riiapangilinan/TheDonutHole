@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% set auth_page = True %}  
+
+{% block content %}
+<section class="section auth-section" style="padding-top: 160px;">
+  <div class="container">
+    <div class="login-form" style="max-width: 500px; margin: 0 auto;">
+      <h2 class="headline-1 section-title text-center">Login</h2>
+      
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" id="flash-message">
+              {% if category == 'success' %}
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+              {% else %}
+                <ion-icon name="alert-circle-outline"></ion-icon>
+              {% endif %}
+              <div class="message-content">{{ message }}</div>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      
+      <form method="POST" action="{{ url_for('login') }}">
+        <div class="input-wrapper">
+          <label for="email" class="label-2">Email</label>
+          <input type="email" id="email" name="email" class="input-field" required>
+        </div>
+        
+        <div class="input-wrapper">
+          <label for="password" class="label-2">Password</label>
+          <input type="password" id="password" name="password" class="input-field" required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="margin-top: 20px;">
+          <span class="text text-1">Login</span>
+          <span class="text text-2" aria-hidden="true">Login</span>
+        </button>
+      </form>
+      
+      <p class="body-4 text-center" style="margin-top: 20px;">
+        Don't have an account? <br>
+        <a href="{{ url_for('register') }}" class="hover-underline-inline">Register here</a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

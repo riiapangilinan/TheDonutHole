@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block preload %}
+  <link rel="preload" as="image" href="./assets/images/about-banner.jpg">
+  <link rel="preload" as="image" href="./assets/images/about-abs-image.jpg">
+{% endblock %}
+
+{% block content %}
+    <article>
+
+      <!-- 
+        - #ABOUT
+      -->
+
+      <section class="section about text-center" aria-labelledby="about-label" id="about" style="padding-top: 160px;">
+        <div class="container">
+
+          <div class="about-content">
+
+            <p class="label-2 section-subtitle" id="about-label">Our Story</p>
+
+            <h2 class="headline-1 section-title">Every Flavor Tells a Story</h2>
+
+            <p class="section-text">
+              Founded in 1950, The Donut Hole began as a small family-owned bakery in Manila with a passion for creating 
+              artisanal donuts that bring joy to every bite. What started as a humble storefront has grown into a beloved 
+              local institution, known for our innovative flavors and commitment to quality.
+            </p>
+
+            <div class="section-text">
+              <p>
+                Our master bakers combine traditional techniques with creative flair, using only the finest ingredients 
+                sourced from local suppliers whenever possible. Each donut is handcrafted with care, ensuring every 
+                customer experiences the perfect balance of flavor and texture.
+              </p>
+            </div>
+
+            <div class="contact-label">Order Through Call</div>
+
+            <a href="tel:+804001234567" class="body-1 contact-number hover-underline">+63 917 123 4566</a>
+
+            <a href="{{ url_for('menu') }}" class="btn btn-primary">
+              <span class="text text-1">View Our Menu</span>
+              <span class="text text-2" aria-hidden="true">View Our Menu</span>
+            </a>
+
+          </div>
+
+          <figure class="about-banner">
+
+            <img src="./assets/images/about-banner.jpg" width="570" height="570" loading="lazy" alt="about banner"
+              class="w-100" data-parallax-item data-parallax-speed="1">
+
+            <div class="abs-img abs-img-1 has-before" data-parallax-item data-parallax-speed="1.75">
+              <img src="./assets/images/about-abs-image.jpg" width="285" height="285" loading="lazy" alt=""
+                class="w-100">
+            </div>
+
+            <div class="abs-img abs-img-2 has-before">
+              <img src="./assets/images/badge-2.png" width="133" height="134" loading="lazy" alt="">
+            </div>
+
+          </figure>
+
+          <img src="./assets/images/shape-3.png" width="197" height="194" loading="lazy" alt="" class="shape">
+
+        </div>
+      </section>
+
+      <!-- 
+        - #OUR TEAM
+      -->
+
+      <section class="section service bg-black-10 text-center" aria-label="service">
+        <div class="container">
+
+          <p class="section-subtitle label-2">Meet The Team</p>
+
+          <h2 class="headline-1 section-title">Our Master Bakers</h2>
+
+          <p class="section-text">
+            Behind every delicious donut is a team of passionate bakers and pastry chefs dedicated to crafting 
+            unforgettable experiences. Get to know the talented individuals who make The Donut Hole special.
+          </p>
+
+          <ul class="grid-list">
+
+            <li>
+              <div class="service-card">
+
+                <a href="#" class="has-before hover:shine">
+                  <figure class="card-banner img-holder" style="--width: 285; --height: 336;">
+                    <img src="./assets/images/team-1.jpg" width="285" height="336" loading="lazy" alt="Head Baker"
+                      class="img-cover">
+                  </figure>
+                </a>
+
+                <div class="card-content">
+
+                  <h3 class="title-4 card-title">
+                    <a href="#">Chef Maria Santos</a>
+                  </h3>
+                  <p class="body-4">Head Baker & Founder</p>
+                  <p class="body-4" style="color: var(--quick-silver);">
+                    15+ years of pastry experience
+                  </p>
+
+                </div>
+
+              </div>
+            </li>
+
+            <li>
+              <div class="service-card">
+
+                <a href="#" class="has-before hover:shine">
+                  <figure class="card-banner img-holder" style="--width: 285; --height: 336;">
+                    <img src="./assets/images/team-2.jpg" width="285" height="336" loading="lazy" alt="Pastry Chef"
+                      class="img-cover">
+                  </figure>
+                </a>
+
+                <div class="card-content">
+
+                  <h3 class="title-4 card-title">
+                    <a href="#">Chef Juan Dela Cruz</a>
+                  </h3>
+                  <p class="body-4">Creative Director</p>
+                  <p class="body-4" style="color: var(--quick-silver);">
+                    Flavor innovation specialist
+                  </p>
+
+                </div>
+
+              </div>
+            </li>
+
+            <li>
+              <div class="service-card">
+
+                <a href="#" class="has-before hover:shine">
+                  <figure class="card-banner img-holder" style="--width: 285; --height: 336;">
+                    <img src="./assets/images/team-3.jpg" width="285" height="336" loading="lazy" alt="Baker"
+                      class="img-cover">
+                  </figure>
+                </a>
+
+                <div class="card-content">
+
+                  <h3 class="title-4 card-title">
+                    <a href="#">Ana Reyes</a>
+                  </h3>
+                  <p class="body-4">Production Manager</p>
+                  <p class="body-4" style="color: var(--quick-silver);">
+                    Quality control expert
+                  </p>
+
+                </div>
+
+              </div>
+            </li>
+
+          </ul>
+
+          <img src="./assets/images/shape-1.png" width="246" height="412" loading="lazy" alt="shape"
+            class="shape shape-1 move-anim">
+          <img src="./assets/images/shape-2.png" width="343" height="345" loading="lazy" alt="shape"
+            class="shape shape-2 move-anim">
+
+        </div>
+      </section>
+
+      <!-- 
+        - #OUR STRENGTHS (Replaced Core Values with Features from index.html)
+      -->
+
+      <section class="section features text-center" aria-label="features">
+        <div class="container">
+
+          <p class="section-subtitle label-2">Why Choose Us</p>
+
+          <h2 class="headline-1 section-title">Our Strengths</h2>
+
+          <ul class="grid-list">
+
+            <li class="feature-item">
+              <div class="feature-card">
+
+                <div class="card-icon">
+                  <img src="./assets/images/features-icon-1.png" width="100" height="80" loading="lazy" alt="icon">
+                </div>
+
+                <h3 class="title-2 card-title">Hygienic Food</h3>
+
+                <p class="label-1 card-text">Every donut is crafted in a spotless kitchen following strict food safety standards.</p>
+
+              </div>
+            </li>
+
+            <li class="feature-item">
+              <div class="feature-card">
+
+                <div class="card-icon">
+                  <img src="./assets/images/features-icon-2.png" width="100" height="80" loading="lazy" alt="icon">
+                </div>
+
+                <h3 class="title-2 card-title">Fresh Environment</h3>
+
+                <p class="label-1 card-text">Our bakery is always clean, vibrant, and filled with the irresistible aroma of freshly baked treats.</p>
+
+              </div>
+            </li>
+
+            <li class="feature-item">
+              <div class="feature-card">
+
+                <div class="card-icon">
+                  <img src="./assets/images/features-icon-3.png" width="100" height="80" loading="lazy" alt="icon">
+                </div>
+
+                <h3 class="title-2 card-title">Skilled Chefs</h3>
+
+                <p class="label-1 card-text">Master bakers with years of experience create perfectly textured, flavorful donuts every time.</p>
+
+              </div>
+            </li>
+
+            <li class="feature-item">
+              <div class="feature-card">
+
+                <div class="card-icon">
+                  <img src="./assets/images/features-icon-4.png" width="100" height="80" loading="lazy" alt="icon">
+                </div>
+
+                <h3 class="title-2 card-title">Event & Party</h3>
+
+                <p class="label-1 card-text">From birthdays to corporate gatherings, our donut spreads make every occasion sweeter.</p>
+
+              </div>
+            </li>
+
+          </ul>
+
+          <img src="./assets/images/shape-7.png" width="208" height="178" loading="lazy" alt="shape"
+            class="shape shape-1">
+
+          <img src="./assets/images/shape-8.png" width="120" height="115" loading="lazy" alt="shape"
+            class="shape shape-2">
+
+        </div>
+      </section>
+
+    </article>
+{% endblock %}

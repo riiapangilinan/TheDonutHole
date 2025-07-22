@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section menu" aria-label="menu-label" style="padding-top: 160px;">
+  <div class="container">
+    <p class="section-subtitle text-center label-2">Special Selection</p>
+    <h2 class="headline-1 section-title text-center">Our Delicious Menu</h2>
+  </div>
+
+  {% for item in menu_items %}
+  <section class="special-dish text-center" aria-labelledby="dish-label">
+    {% if loop.index % 2 == 1 %}
+      <div class="special-dish-banner">
+        <img src="{{ url_for('static', filename='images/' + item.image) }}" width="940" height="900" loading="lazy" alt="{{ item.name }}" class="img-cover">
+      </div>
+
+      <div class="special-dish-content bg-black-10">
+        <div class="container">
+          {% if loop.index == 4 %}
+            <img src="{{ url_for('static', filename='images/badge-1.png') }}" width="28" height="41" loading="lazy" alt="badge" class="abs-img">
+            <p class="section-subtitle label-2">Signature Dish</p>
+          {% endif %}
+
+          <h2 class="headline-1 section-title">{{ item.name }}</h2>
+
+          <p class="section-text">{{ item.description }}</p>
+
+          <div class="wrapper">
+            <span class="span body-1">₱{{ "%.2f"|format(item.price) }}</span>
+          </div>
+
+          {% if 'email' in session %}
+          <button class="btn btn-primary add-to-cart"
+                  data-id="{{ item.id }}"
+                  data-name="{{ item.name }}"
+                  data-price="{{ item.price }}">
+            <span class="text text-1">Add to Cart</span>
+            <span class="text text-2" aria-hidden="true">Add to Cart</span>
+          </button>
+          {% else %}
+          <a href="{{ url_for('login', next=url_for('menu')) }}" class="btn btn-primary">
+            <span class="text text-1">Login to Order</span>
+            <span class="text text-2" aria-hidden="true">Login to Order</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <img src="{{ url_for('static', filename='images/shape-2.png') }}" width="179" height="359" loading="lazy" alt="" class="shape shape-4 move-anim" style="right: 0; left: auto;">
+    {% else %}
+      <img src="{{ url_for('static', filename='images/shape-1.png') }}" width="179" height="359" loading="lazy" alt="" class="shape shape-1 move-anim" style="left: -110px; right: auto;">
+      
+      <div class="special-dish-content bg-black-10">
+        <div class="container">
+          {% if loop.index == 4 %}
+            <img src="{{ url_for('static', filename='images/badge-1.png') }}" width="28" height="41" loading="lazy" alt="badge" class="abs-img">
+            <p class="section-subtitle label-2">Signature Dish</p>
+          {% endif %}
+
+          <h2 class="headline-1 section-title">{{ item.name }}</h2>
+
+          <p class="section-text">{{ item.description }}</p>
+
+          <div class="wrapper">
+            <span class="span body-1">₱{{ "%.2f"|format(item.price) }}</span>
+          </div>
+
+          {% if 'email' in session %}
+          <button class="btn btn-primary add-to-cart"
+                  data-id="{{ item.id }}"
+                  data-name="{{ item.name }}"
+                  data-price="{{ item.price }}">
+            <span class="text text-1">Add to Cart</span>
+            <span class="text text-2" aria-hidden="true">Add to Cart</span>
+          </button>
+          {% else %}
+          <a href="{{ url_for('login', next=url_for('menu')) }}" class="btn btn-primary">
+            <span class="text text-1">Login to Order</span>
+            <span class="text text-2" aria-hidden="true">Login to Order</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="special-dish-banner">
+        <img src="{{ url_for('static', filename='images/' + item.image) }}" width="940" height="900" loading="lazy" alt="{{ item.name }}" class="img-cover">
+      </div>
+    {% endif %}
+  </section>
+  {% endfor %}
+{% endblock %}

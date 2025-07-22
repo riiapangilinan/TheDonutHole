@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section checkout-section" style="padding-top: 160px;">
+  <div class="container" style="max-width: 700px; margin: 0 auto;">
+    <h2 class="headline-1 section-title text-center">Checkout</h2>
+
+    <!-- Currency Selector -->
+    <div class="form-group" style="margin-bottom: 1.5rem;">
+      <label for="currency">Choose Currency:</label>
+      <select id="currency" class="input-field">
+        {% for currency in currencies %}
+        <option value="{{ currency.code }}"
+                data-rate="{{ currency.exchange_rate_to_php }}"
+                data-symbol="{{ currency.symbol }}"
+                {% if currency.code == 'PHP' %}selected{% endif %}>
+          {{ currency.code }} ({{ currency.symbol }})
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Order Summary -->
+    <div id="checkoutSummary" style="margin-bottom: 2rem;"></div>
+
+    <!-- Checkout Form -->
+    <form id="checkoutForm" method="POST" action="{{ url_for('submit_checkout') }}">
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label for="name">Full Name</label>
+        <input id="name" name="name" class="input-field" required
+               value="{{ session.get('name', '') }}">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label for="address">Shipping Address</label>
+        <textarea id="address" name="address" class="input-field" required>{{ session.get('address', '') }}</textarea>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.5rem;">
+        <label for="payment_method">Payment Method</label>
+        <select id="payment_method" name="payment_method" class="input-field" required>
+          <option value="" disabled selected>Select a payment method</option>
+          <option value="Cash on Delivery">Cash on Delivery</option>
+          <option value="GCash">GCash</option>
+        </select>
+      </div>
+
+      <!-- Hidden input to send cart data to backend -->
+      <input type="hidden" name="cart_data" id="cart_data">
+
+      <button type="submit" class="btn btn-primary w-100">Place Order</button>
+    </form>
+  </div>
+</section>
+
+<script>
+  const cart = JSON.parse(sessionStorage.getItem('cart')) || JSON.parse(localStorage.getItem('cart')) || [];
+  const summary = document.getElementById('checkoutSummary');
+  const currencySelector = document.getElementById('currency');
+  const cartDataInput = document.getElementById('cart_data');
+  const checkoutForm = document.getElementById('checkoutForm');
+
+  function renderSummary() {
+    if (!Array.isArray(cart) || cart.length === 0) {
+      summary.innerHTML = '<p>Your cart is empty.</p>';
+      checkoutForm.style.display = 'none';
+      return;
+    }
+
+    checkoutForm.style.display = 'block';
+
+    const selectedOption = currencySelector.options[currencySelector.selectedIndex];
+    const rate = parseFloat(selectedOption.dataset.rate) || 1;
+    const symbol = selectedOption.dataset.symbol || '';
+
+    let html = '<h3>Order Summary</h3><ul>';
+    let total = 0;
+
+    cart.forEach(item => {
+      const name = item.name || 'Unnamed Item';
+      const quantity = parseInt(item.quantity) || 1;
+      const priceInPHP = parseFloat(item.price) || 0;
+      const priceInSelectedCurrency = priceInPHP / rate;
+      const itemTotal = priceInSelectedCurrency * quantity;
+
+      html += `<li>${name} (x${quantity}) - ${symbol}${itemTotal.toFixed(2)}</li>`;
+      total += itemTotal;
+    });
+
+    html += `</ul><p><strong>Total:</strong> ${symbol}${total.toFixed(2)}</p>`;
+    summary.innerHTML = html;
+  }
+
+  currencySelector.addEventListener('change', renderSummary);
+
+  checkoutForm.addEventListener('submit', () => {
+    cartDataInput.value = JSON.stringify(cart);
+  });
+
+  renderSummary();
+</script>
+{% endblock %}

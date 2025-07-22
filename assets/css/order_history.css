@@ -1,0 +1,50 @@
+.table {
+  width: 100%;
+  border: 1px solid #ccc;
+}
+
+.table th, .table td {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+.table th {
+  background-color: #f2f2f2;
+}
+
+.order-card {
+  background-color: var(--white);
+  padding: 20px;
+  border-radius: var(--radius-16);
+  box-shadow: var(--shadow-2);
+  transition: transform 0.3s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-5px);
+}
+
+.order-detail-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 10px;
+  column-gap: 20px;
+  margin-top: 10px;
+}
+
+.status.paid {
+  color: var(--green-crayola);
+  font-weight: bold;
+}
+
+.status.pending {
+  color: var(--orange-soda);
+  font-weight: bold;
+}
+
+.status.cancelled {
+  color: var(--red-salsa);
+  font-weight: bold;
+}
+

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section menu" aria-label="order history" style="padding-top: 160px;">
+  <div class="container">
+
+    <p class="section-subtitle text-center label-2">Your Orders</p>
+    <h2 class="headline-1 section-title text-center">Order History</h2>
+
+    {% if orders %}
+    <ul class="grid-list">
+
+      {% for order in orders %}
+      <li>
+        <div class="order-card card">
+
+          <div class="card-content">
+            <h3 class="title-3 card-title">Order #{{ order.order_id }}</h3>
+
+            <div class="order-detail-group">
+              <p class="label-1">
+                <strong>Date:</strong>
+                {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+              </p>
+
+              <p class="label-1">
+                <strong>Total:</strong>
+                ₱{{ '%.2f' | format(order.total) }}
+              </p>
+
+              <p class="label-1">
+                <strong>Payment:</strong>
+                {{ order.payment_method or 'N/A' }}
+              </p>
+
+              <p class="label-1">
+                <strong>Status:</strong>
+                <span class="status {{ order.status | lower }}">
+                  {{ order.status.capitalize() }}
+                </span>
+              </p>
+
+              <p class="label-1">
+                <strong>Transaction:</strong>
+                {{ order.transaction_status or 'N/A' }}
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </li>
+      {% endfor %}
+
+    </ul>
+    {% else %}
+    <div class="text-center" style="margin-top: 3rem;">
+      <img src="/assets/images/empty-box.png" width="200" alt="No Orders">
+      <p class="label-2" style="margin: 1rem 0;">You haven't placed any orders yet.</p>
+      <a href="{{ url_for('menu') }}" class="btn btn-secondary">
+        <span class="text text-1">Browse Menu</span>
+        <span class="text text-2" aria-hidden="true">Browse Menu</span>
+      </a>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}
