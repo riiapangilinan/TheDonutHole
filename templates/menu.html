@@ -10,10 +10,6 @@
   {% for item in menu_items %}
   <section class="special-dish text-center" aria-labelledby="dish-label">
     {% if loop.index % 2 == 1 %}
-<<<<<<< HEAD
-=======
-      <!-- Odd items: image on left -->
->>>>>>> 649e54f7848e54f63d5ebedea327f54df22fdf16
       <div class="special-dish-banner">
         <img src="{{ url_for('static', filename='images/' + item.image) }}" width="940" height="900" loading="lazy" alt="{{ item.name }}" class="img-cover">
       </div>
@@ -27,27 +23,17 @@
 
           <h2 class="headline-1 section-title">{{ item.name }}</h2>
 
-<<<<<<< HEAD
           <p class="section-text">{{ item.description }}</p>
-=======
-          <p class="section-text">
-            {{ item.description }}
-          </p>
->>>>>>> 649e54f7848e54f63d5ebedea327f54df22fdf16
 
           <div class="wrapper">
             <span class="span body-1">₱{{ "%.2f"|format(item.price) }}</span>
           </div>
 
           {% if 'email' in session %}
-<<<<<<< HEAD
           <button class="btn btn-primary add-to-cart"
                   data-id="{{ item.id }}"
                   data-name="{{ item.name }}"
                   data-price="{{ item.price }}">
-=======
-          <button class="btn btn-primary add-to-cart" data-id="{{ item.id }}">
->>>>>>> 649e54f7848e54f63d5ebedea327f54df22fdf16
             <span class="text text-1">Add to Cart</span>
             <span class="text text-2" aria-hidden="true">Add to Cart</span>
           </button>
@@ -59,22 +45,11 @@
           {% endif %}
         </div>
       </div>
-<<<<<<< HEAD
 
       <img src="{{ url_for('static', filename='images/shape-2.png') }}" width="179" height="359" loading="lazy" alt="" class="shape shape-4 move-anim" style="right: 0; left: auto;">
     {% else %}
       <img src="{{ url_for('static', filename='images/shape-1.png') }}" width="179" height="359" loading="lazy" alt="" class="shape shape-1 move-anim" style="left: -110px; right: auto;">
       
-=======
-      
-      <!-- Odd items: shape-2 on right -->
-      <img src="{{ url_for('static', filename='images/shape-2.png') }}" width="179" height="359" loading="lazy" alt="" class="shape shape-4 move-anim" style="right: 0; left: auto;">
-    {% else %}
-      <!-- Even items: shape-1 on left (moved further left) -->
-      <img src="{{ url_for('static', filename='images/shape-1.png') }}" width="179" height="359" loading="lazy" alt="" class="shape shape-1 move-anim" style="left: -110px; right: auto;">
-      
-      <!-- Even items: image on right -->
->>>>>>> 649e54f7848e54f63d5ebedea327f54df22fdf16
       <div class="special-dish-content bg-black-10">
         <div class="container">
           {% if loop.index == 4 %}
@@ -84,27 +59,17 @@
 
           <h2 class="headline-1 section-title">{{ item.name }}</h2>
 
-<<<<<<< HEAD
           <p class="section-text">{{ item.description }}</p>
-=======
-          <p class="section-text">
-            {{ item.description }}
-          </p>
->>>>>>> 649e54f7848e54f63d5ebedea327f54df22fdf16
 
           <div class="wrapper">
             <span class="span body-1">₱{{ "%.2f"|format(item.price) }}</span>
           </div>
 
           {% if 'email' in session %}
-<<<<<<< HEAD
           <button class="btn btn-primary add-to-cart"
                   data-id="{{ item.id }}"
                   data-name="{{ item.name }}"
                   data-price="{{ item.price }}">
-=======
-          <button class="btn btn-primary add-to-cart" data-id="{{ item.id }}">
->>>>>>> 649e54f7848e54f63d5ebedea327f54df22fdf16
             <span class="text text-1">Add to Cart</span>
             <span class="text text-2" aria-hidden="true">Add to Cart</span>
           </button>
@@ -123,8 +88,4 @@
     {% endif %}
   </section>
   {% endfor %}
-<<<<<<< HEAD
 {% endblock %}
-=======
-{% endblock %}
->>>>>>> 649e54f7848e54f63d5ebedea327f54df22fdf16

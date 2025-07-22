@@ -17,8 +17,8 @@ def get_db_connection():
     try:
         connection = mysql.connector.connect(
             host='localhost',
-            user='root',
-            password='Richard18!',  # change to your pw
+            user='admin',
+            password='DLSU1234',  # change to your pw
             database='donut_hole'
         )
         return connection
