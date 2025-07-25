@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block topbar %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block content %}
+<section class="section" aria-label="Admin Panel" style="padding: 40px 0; margin-top: 130px;">
+  <div class="container" style="max-width: 1200px; margin: 0 auto;">
+    <p class="section-subtitle text-center label-2" style="color: #6c757d;">Admin Panel</p>
+    <h2 class="headline-1 section-title text-center" style="margin-bottom: 30px;">Dashboard</h2>
+    <div class="row" style="display: flex; flex-direction: column; gap: 20px;">
+
+      <!-- Product and Manage Product Panels -->
+      <div style="display: flex; gap: 20px;">
+
+        <!-- Product List -->
+        <div class="col-12 col-md-6" style="flex: 1;">
+        <div style="background: rgb(41, 41, 41); padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 20px; height: 100%;">
+          <p class="section-subtitle text-center label-2" style="color: #6c757d;">Product List</p>
+          <div style="height: 600px; overflow-y: auto;">
+            {% for item in products %}
+            <div style="display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #3f3f3f">
+              {% if item.image %}
+                <img src="{{ url_for('static', filename='images/' + item.image) }}" alt="{{ item.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 12px;">
+              {% else %}
+                <div style="width: 50px; height: 50px; background: #dee2e6; border-radius: 4px; margin-right: 12px;"></div>
+              {% endif %}
+              <div style="flex-grow: 1;">
+                <div style="color: #fcfcfc;">{{ item.name }}</div>
+                <div style="font-size: 15px; color: #999999;">₱{{ '%.2f'|format(item.price) }} &bull; Stock: {{ item.stock_quantity }}{% if not item.is_active %} <em>(Inactive)</em>{% endif %}</div>
+              </div>
+              <div style="padding-right: 5px;">
+                <a href="{{ url_for('admin', edit=item.id) }}" class="btn btn-primary">
+                  <span class="text text-1">Edit</span>
+                  <span class="text text-2" aria-hidden="true">Edit</span>
+                </a>
+              </div>
+              <a href="{{ url_for('delete_product', product_id=item.id) }}" class="btn btn-primary" onclick="return confirm('Delete this product?')">
+                <span class="text text-1">Delete</span>
+                <span class="text text-2" aria-hidden="true">Delete</span>
+              </a>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+        <!-- Manage Products -->
+        <div class="col-12 col-md-6" style="flex: 1;">
+          <div style="background: rgb(41, 41, 41); padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 20px; height: 100%;">
+            <p class="section-subtitle text-center label-2" style="color: #6c757d;">Manage Products</p>
+            {% if editing_id %}
+              <h4 class="text-center" style="margin-bottom: 20px;">Edit Product</h4>
+              {% set edit_item = products|selectattr('id', 'equalto', editing_id)|first %}
+              <form method="POST" action="{{ url_for('edit_product', product_id=editing_id) }}" enctype="multipart/form-data">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label for="name">Product Name</label>
+                  <input type="text" name="name" class="input-field" value="{{ edit_item.name }}" required>
+                </div>
+                <div style="display: flex; gap: 20px; margin-bottom: 1rem;">
+                  <div class="form-group" style="flex: 1;">
+                    <label for="price">Price (₱)</label>
+                    <input type="number" step="0.01" name="price" class="input-field" value="{{ edit_item.price }}" required>
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label for="stock_quantity">Stock Quantity</label>
+                    <input type="number" name="stock_quantity" class="input-field" value="{{ edit_item.stock_quantity }}" required>
+                  </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label for="description">Description</label>
+                  <textarea name="description" class="input-field" rows="3" required>{{ edit_item.description }}</textarea>
+                </div>
+                <div class="mb-3" style="padding-top: 10px;">
+                  <label for="image" style="display: block; margin-bottom: 5px;">Current Image</label>
+                  <img src="{{ url_for('static', filename='images/' + edit_item.image) }}" alt="{{ edit_item.name }}" style="width: 100px; object-fit: cover; border-radius: 4px; margin-bottom: 10px; display: block;">
+                  <label for="new_image" style="display: block; margin-bottom: 5px;">Upload New Image</label>
+                  <input type="file" name="image" id="new_image" class="input-field">
+                </div>
+                <div class="form-check mb-3" style="display: flex; align-items: center; gap: 10px;">
+                  <label class="form-check-label" for="activeCheck{{ edit_item.id }}">Active</label>
+                  <input class="form-check-input" type="checkbox" name="is_active" id="activeCheck{{ edit_item.id }}" {% if edit_item.is_active %}checked{% endif %} style="width: 20px; height: 20px; margin: 0;">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                  <button type="submit" class="btn btn-primary">
+                    <span class="text text-1">Save Changes</span>
+                    <span class="text text-2" aria-hidden="true">Save Changes</span>
+                  </button>
+                  <a href="{{ url_for('admin') }}" class="btn btn-secondary">
+                    <span class="text text-1">Cancel</span>
+                    <span class="text text-2" aria-hidden="true">Cancel</span>
+                  </a>
+                </div>
+              </form>
+            {% else %}
+              <h4 class="text-center" style="margin-bottom: 20px;">Add New Product</h4>
+              <form method="POST" action="{{ url_for('add_product') }}" enctype="multipart/form-data">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label for="name">Product Name</label>
+                  <input type="text" name="name" class="input-field" required>
+                </div>
+                <div style="display: flex; gap: 20px; margin-bottom: 1rem;">
+                  <div class="form-group" style="flex: 1;">
+                    <label for="price">Price (₱)</label>
+                    <input type="number" step="0.01" name="price" class="input-field">
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label for="stock_quantity">Stock Quantity</label>
+                    <input type="number" name="stock_quantity" class="input-field">
+                  </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label for="description">Description</label>
+                  <textarea name="description" class="input-field" rows="3"></textarea>
+                </div>
+                <div class="mb-3" style="padding-top: 10px;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="btn btn-primary" type="button" onclick="document.getElementById('imageUpload').click()">
+                      <span class="text text-1">Select Image</span>
+                      <span class="text text-2" aria-hidden="true">Select Image</span>
+                    </button>
+                    <button id="clearBtn" class="btn btn-secondary" type="button" style="display: none;">
+                      <span class="text text-1">Clear</span>
+                      <span class="text text-2" aria-hidden="true">Clear</span>
+                    </button>
+                  </div>
+                  <input id="imageUpload" type="file" name="image" class="form-control" required style="display: none;">
+                  <span id="fileName" style="color: #ccc; margin-top: 5px; display: block;"></span>
+                </div>
+                <div style="display: flex; justify-content: center; align-items: center; height: 50px;">
+                  <button type="submit" class="btn btn-primary">
+                    <span class="text text-1">Confirm</span>
+                    <span class="text text-2" aria-hidden="true">Confirm</span>
+                  </button>
+                </div>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Panel -->
+      <div class="col-12">
+        <div style="background: rgb(41, 41, 41); padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+          <p class="section-subtitle text-center label-2" style="color: #6c757d;">Manage Users</p>
+          <div style="overflow-x: auto;">
+            <table class="table table-striped" style="width: 80%; color: #fcfcfc; margin: auto;">
+              <thead>
+                <tr>
+                  <th style="text-align: center; vertical-align: middle;">ID</th>
+                  <th style="text-align: center; vertical-align: middle;">Name</th>
+                  <th style="text-align: center; vertical-align: middle;">Email</th>
+                  <th style="text-align: center; vertical-align: middle;">Role</th>
+                  <th style="text-align: center; vertical-align: middle;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in users %}
+                <tr style="height:60px;">
+                  <td style="text-align: center; vertical-align: middle;">
+                    {{ user.id }}
+                    <form id="update-role-{{ user.id }}" action="{{ url_for('update_user_role', user_id=user.id) }}" method="POST" style="display: none;"></form>
+                  </td>
+                  <td style="text-align: center; vertical-align: middle;">{{ user.name }}</td>
+                  <td style="text-align: center; vertical-align: middle;">{{ user.email }}</td>
+                  <td style="text-align: center; vertical-align: middle;">
+                    <select name="role" form="update-role-{{ user.id }}" class="input-field" style="margin: auto; height: 50px; width: 140px;">
+                      <option value="customer" {% if user.role == 'customer' %}selected{% endif %}>Customer</option>
+                      <option value="staff" {% if user.role == 'staff' %}selected{% endif %}>Staff</option>
+                      <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                    </select>
+                  </td>
+                  <td style="text-align: center; vertical-align: middle;">
+                    <div style="display: flex; justify-content: center; gap: 5px;">
+                      <button type="submit" form="update-role-{{ user.id }}" class="btn btn-primary">
+                        <span class="text text-1">Update</span>
+                        <span class="text text-2" aria-hidden="true">Update</span>
+                      </button>
+                      <form action="{{ url_for('delete_user', user_id=user.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this user?');" style="margin: 0;">
+                        <button type="submit" class="btn btn-primary">
+                          <span class="text text-1">Delete</span>
+                          <span class="text text-2" aria-hidden="true">Delete</span>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<script>
+  const imageUpload = document.getElementById('imageUpload');
+  const clearBtn = document.getElementById('clearBtn');
+  const fileName = document.getElementById('fileName');
+
+  if (imageUpload) {
+    imageUpload.addEventListener('change', () => {
+      if (imageUpload.files.length > 0) {
+        fileName.textContent = imageUpload.files[0].name;
+        clearBtn.style.display = 'inline-block';
+      } else {
+        fileName.textContent = '';
+        clearBtn.style.display = 'none';
+      }
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      imageUpload.value = '';
+      fileName.textContent = '';
+      clearBtn.style.display = 'none';
+    });
+  }
+</script>
+{% endblock %}

@@ -3,7 +3,7 @@ CREATE DATABASE IF NOT EXISTS donut_hole;
 USE donut_hole;
 
 -- Drop existing tables if needed (optional cleanup)
-DROP TABLE IF EXISTS transactions, order_items, orders, currencies, products, users;
+DROP TABLE IF EXISTS transactions, order_items, orders, currencies, products, users, user_carts;
 
 -- USERS
 CREATE TABLE users (
@@ -26,12 +26,23 @@ CREATE TABLE products (
     is_active BOOLEAN DEFAULT TRUE
 );
 
+-- USER CARTS
+CREATE TABLE user_carts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    UNIQUE(user_id, product_id)
+);
+
 -- ORDERS
 CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     total DECIMAL(10, 2) DEFAULT 0.00,
-    status ENUM('Pending', 'Paid', 'Cancelled') DEFAULT 'Pending',
+    status ENUM('Pending', 'Processing', 'Paid', 'Shipped', 'Delivered', 'Cancelled') DEFAULT 'Pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -82,9 +93,8 @@ INSERT INTO currencies (code, symbol, exchange_rate_to_php) VALUES
 
 -- STORED PROCEDURES --
 
-DELIMITER //
-
 DROP PROCEDURE IF EXISTS get_user_orders;
+DELIMITER //
 CREATE PROCEDURE get_user_orders(IN p_user_id INT)
 BEGIN
     SELECT
@@ -99,21 +109,27 @@ BEGIN
     WHERE o.user_id = p_user_id
     ORDER BY o.created_at DESC;
 END //
+DELIMITER ;
 
 DROP PROCEDURE IF EXISTS add_product;
+DELIMITER //
 CREATE PROCEDURE add_product(IN pname VARCHAR(255), IN pdesc TEXT, IN pprice DECIMAL(10,2), IN pstock INT)
 BEGIN
     INSERT INTO products (name, description, price, stock, is_active)
     VALUES (pname, pdesc, pprice, pstock, TRUE);
 END //
+DELIMITER ;
 
 DROP PROCEDURE IF EXISTS update_product_stock;
+DELIMITER //
 CREATE PROCEDURE update_product_stock(IN pid INT, IN qty INT)
 BEGIN
     UPDATE products SET stock_quantity = stock_quantity - qty WHERE id = pid;
 END //
+DELIMITER ;
 
 DROP PROCEDURE IF EXISTS create_order;
+DELIMITER //
 CREATE PROCEDURE create_order(IN p_user_id INT, IN p_total DECIMAL(10,2), IN p_items JSON)
 BEGIN
     -- Declare handler for SQL exceptions
@@ -138,21 +154,24 @@ BEGIN
     -- If all operations are successful
     COMMIT;
 END //
+DELIMITER ;
 
 DROP PROCEDURE IF EXISTS add_order_item;
+DELIMITER //
 CREATE PROCEDURE add_order_item(IN oid INT, IN pid INT, IN qty INT, IN price DECIMAL(10,2))
 BEGIN
     INSERT INTO order_items (order_id, product_id, quantity, price)
     VALUES (oid, pid, qty, price);
 END //
+DELIMITER ;
 
 DROP PROCEDURE IF EXISTS record_transaction;
+DELIMITER //
 CREATE PROCEDURE record_transaction(IN oid INT, IN amt DECIMAL(10,2), IN pmethod VARCHAR(50), IN tstatus ENUM('Success', 'Failed'))
 BEGIN
     INSERT INTO transactions (order_id, amount, payment_method, status)
     VALUES (oid, amt, pmethod, tstatus);
 END //
-
 DELIMITER ;
 
 -- TRIGGERS --
@@ -291,5 +310,3 @@ GRANT SELECT ON donut_hole.transactions TO 'admin_role';
 GRANT EXECUTE ON PROCEDURE donut_hole.add_product TO 'admin_role';
 
 FLUSH PRIVILEGES;
-
-SHOW PROCEDURE STATUS;

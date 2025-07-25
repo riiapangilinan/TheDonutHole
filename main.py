@@ -65,6 +65,31 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# --- Role-Specific Decorators ---
+def staff_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please login to access this page.', 'warning')
+            return redirect(url_for('login'))
+        if session.get('role') not in ['staff', 'admin']:
+            flash('You do not have permission to access this page.', 'danger')
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please login to access this page.', 'warning')
+            return redirect(url_for('login'))
+        if session.get('role') != 'admin':
+            flash('You do not have permission to access this page.', 'danger')
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -73,7 +98,7 @@ def home():
 def menu():
     try:
         with db_transaction() as (conn, cursor):
-            cursor.execute("SELECT * FROM products WHERE is_active = TRUE")
+            cursor.execute("SELECT * FROM products")
             menu_items = cursor.fetchall()
             return render_template('menu.html', menu_items=menu_items)
     except Exception as e:
@@ -114,64 +139,99 @@ def register():
     return render_template('register.html')
 
 @app.route('/add_to_cart', methods=['POST'])
+@login_required
 def add_to_cart():
     data = request.get_json()
-    product_id = str(data.get('id'))
-    name = data.get('name')
-    price = float(data.get('price'))
+    product_id = data.get('id')
+    user_id = session['user_id']
 
-    if 'cart' not in session:
-        session['cart'] = {}
+    try:
+        with db_transaction() as (conn, cursor):
+            # Check if the item is already in the user's cart
+            cursor.execute(
+                "SELECT * FROM user_carts WHERE user_id = %s AND product_id = %s",
+                (user_id, product_id)
+            )
+            cart_item = cursor.fetchone()
 
-    cart = session['cart']
+            if cart_item:
+                # If it exists, increment the quantity
+                cursor.execute(
+                    "UPDATE user_carts SET quantity = quantity + 1 WHERE user_id = %s AND product_id = %s",
+                    (user_id, product_id)
+                )
+            else:
+                # If not, insert a new record
+                cursor.execute(
+                    "INSERT INTO user_carts (user_id, product_id, quantity) VALUES (%s, %s, 1)",
+                    (user_id, product_id)
+                )
+            
+            # Load the updated cart data
+            cart_data = _load_cart_from_db(cursor, user_id)
 
-    if product_id in cart:
-        cart[product_id]['quantity'] += 1
-    else:
-        cart[product_id] = {
-            'id': int(product_id),
-            'name': name,
-            'price': price,
-            'quantity': 1
-        }
-
-    session['cart'] = cart
-    session.modified = True
-    return jsonify({'message': f"Added {name} to cart!"})
+        return jsonify({
+            'success': True,
+            'message': 'Item added to cart successfully!',
+            'cart': cart_data,
+            'cart_count': sum(item['quantity'] for item in cart_data.values()),
+            'cart_total': sum(item['price'] * item['quantity'] for item in cart_data.values())
+        })
+    except Exception as e:
+        print(f"Error adding to cart: {e}")
+        return jsonify({'error': 'Failed to add item to cart.'}), 500
 
 @app.route('/cart')
 @login_required
 def cart():
-    cart_items = session.get('cart', {})
-    total = sum(item['price'] * item['quantity'] for item in cart_items.values())
-    return render_template('cart.html', cart=cart_items, total=total)
+    user_id = session['user_id']
+    try:
+        with db_transaction() as (conn, cursor):
+            cart_items = _load_cart_from_db(cursor, user_id)
+            total = sum(item['price'] * item['quantity'] for item in cart_items.values())
+            return render_template('cart.html', cart=cart_items, total=total)
+    except Exception as e:
+        print(f"Error loading cart: {e}")
+        flash('Error loading your cart.', 'danger')
+        return render_template('cart.html', cart={}, total=0)
 
 @app.route('/update_cart', methods=['POST'])
 @login_required
 def update_cart():
     data = request.get_json()
     action = data.get('action')
-    item_id = str(data.get('item_id'))
+    product_id = data.get('item_id')
+    user_id = session['user_id']
 
-    cart = session.get('cart', {})
-
-    if item_id in cart:
-        if action == 'increase':
-            cart[item_id]['quantity'] += 1
-        elif action == 'decrease':
-            cart[item_id]['quantity'] = max(1, cart[item_id]['quantity'] - 1)
-        elif action == 'remove':
-            del cart[item_id]
-
-    session['cart'] = cart
-    session.modified = True
-
-    return jsonify({
-        'success': True,
-        'cart': cart,
-        'cart_count': sum(item['quantity'] for item in cart.values()),
-        'cart_total': sum(item['price'] * item['quantity'] for item in cart.values())
-    })
+    try:
+        with db_transaction() as (conn, cursor):
+            if action == 'increase':
+                cursor.execute(
+                    "UPDATE user_carts SET quantity = quantity + 1 WHERE user_id = %s AND product_id = %s",
+                    (user_id, product_id)
+                )
+            elif action == 'decrease':
+                cursor.execute(
+                    "UPDATE user_carts SET quantity = GREATEST(1, quantity - 1) WHERE user_id = %s AND product_id = %s",
+                    (user_id, product_id)
+                )
+            elif action == 'remove':
+                cursor.execute(
+                    "DELETE FROM user_carts WHERE user_id = %s AND product_id = %s",
+                    (user_id, product_id)
+                )
+            
+            cart_data = _load_cart_from_db(cursor, user_id)
+            
+            return jsonify({
+                'success': True,
+                'cart': cart_data,
+                'cart_count': sum(item['quantity'] for item in cart_data.values()),
+                'cart_total': sum(item['price'] * item['quantity'] for item in cart_data.values())
+            })
+    except Exception as e:
+        print(f"Error updating cart: {e}")
+        return jsonify({'success': False, 'error': 'Failed to update cart.'}), 500
 
 @app.route('/save-cart-session', methods=['POST'])
 def save_cart_session():
@@ -180,6 +240,29 @@ def save_cart_session():
     return '', 204
 
 # --- Enhanced Login with Transaction ---
+def _load_cart_from_db(cursor, user_id):
+    """Helper function to load cart from DB and store it in the session."""
+    cursor.execute("""
+        SELECT p.id, p.name, p.price, uc.quantity
+        FROM user_carts uc
+        JOIN products p ON uc.product_id = p.id
+        WHERE uc.user_id = %s
+    """, (user_id,))
+    
+    cart_items = cursor.fetchall()
+    
+    cart = {
+        str(item['id']): {
+            'id': item['id'],
+            'name': item['name'],
+            'price': float(item['price']),
+            'quantity': item['quantity']
+        } for item in cart_items
+    }
+    session['cart'] = cart
+    session.modified = True
+    return cart
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -196,11 +279,14 @@ def login():
                     session['email'] = user['email']
                     session['name'] = user['name']
                     session['role'] = user['role']
+                    
+                    # Load user's cart from database into session
+                    _load_cart_from_db(cursor, user['id'])
 
                     flash('Logged in successfully.', 'success')
 
                     if user['role'] == 'admin':
-                        return redirect(url_for('admin_panel'))
+                        return redirect(url_for('admin'))
                     else:
                         return redirect(url_for('home'))
                 else:
@@ -247,11 +333,18 @@ def contact():
 @app.route('/checkout')
 @login_required
 def checkout():
+    user_id = session['user_id']
     try:
         with db_transaction() as (conn, cursor):
+            # Fetch currencies
             cursor.execute("SELECT * FROM currencies")
             currencies = cursor.fetchall()
-            return render_template('checkout.html', currencies=currencies)
+            
+            # Fetch cart items from the database to ensure data is current
+            cart_items = _load_cart_from_db(cursor, user_id)
+            total = sum(item['price'] * item['quantity'] for item in cart_items.values())
+            
+            return render_template('checkout.html', currencies=currencies, cart=cart_items, total=total)
     except Exception as e:
         print(f"Error loading checkout: {e}")
         flash('Error loading checkout page.', 'danger')
@@ -267,7 +360,8 @@ def submit_checkout():
     cart_json = request.form.get('cart_data')
     
     try:
-        cart = json.loads(cart_json) if cart_json else {}
+        cart_dict = json.loads(cart_json) if cart_json else {}
+        cart = list(cart_dict.values()) # Convert dict to list of items
     except json.JSONDecodeError:
         flash("Invalid cart data.", "danger")
         return redirect(url_for('checkout'))
@@ -278,7 +372,6 @@ def submit_checkout():
 
     user_id = session['user_id']
     total = sum(item['price'] * item['quantity'] for item in cart)
-    cart_items_json = json.dumps(cart)
 
     try:
         with db_transaction() as (conn, cursor):
@@ -319,7 +412,10 @@ def submit_checkout():
             # Step 4: Record transaction
             cursor.callproc('record_transaction', (order_id, total, payment_method, 'Success'))
 
-            # Step 5: Clear cart from session
+            # Step 5: Clear user's cart from the database
+            cursor.execute("DELETE FROM user_carts WHERE user_id = %s", (user_id,))
+
+            # Step 6: Clear cart from session
             session.pop('cart', None)
             session.modified = True
 
@@ -341,36 +437,33 @@ def submit_checkout():
         return redirect(url_for('checkout'))
 
 # -- Enhanced Admin Side with Transactions --
-@app.route('/admin_panel')
-@login_required
-def admin_panel():
-    if session.get('role') != 'admin':
-        flash('Access denied: Admins only.', 'danger')
-        return redirect(url_for('home'))
-
+@app.route('/admin')
+@admin_required
+def admin():
     editing_id = request.args.get('edit', type=int)
-    
     try:
         with db_transaction() as (conn, cursor):
+            # Fetch products
             cursor.execute(
                 "SELECT id, name, price, stock_quantity, description, image, is_active "
                 "FROM products ORDER BY id DESC"
             )
             products = cursor.fetchall()
-            return render_template('admin_products.html', products=products, editing_id=editing_id)
+
+            # Fetch users
+            cursor.execute("SELECT id, name, email, role FROM users")
+            users = cursor.fetchall()
+
+            return render_template('admin.html', products=products, users=users, editing_id=editing_id)
             
     except Exception as e:
         print(f"Error loading admin panel: {e}")
-        flash('Error loading products.', 'danger')
-        return render_template('admin_products.html', products=[], editing_id=editing_id)
+        flash('Error loading admin panel.', 'danger')
+        return render_template('admin.html', products=[], users=[], editing_id=editing_id)
 
 @app.route('/add_product', methods=['POST'])
-@login_required
+@admin_required
 def add_product():
-    if session.get('role') != 'admin':
-        flash('Unauthorized', 'danger')
-        return redirect(url_for('admin_panel'))
-
     name = request.form.get('name')
     price = request.form.get('price')
     stock_qty = request.form.get('stock_quantity', type=int) or 0
@@ -403,15 +496,11 @@ def add_product():
         print(f"Error adding product: {e}")
         flash("Error adding product.", 'danger')
 
-    return redirect(url_for('admin_panel'))
+    return redirect(url_for('admin'))
 
 @app.route('/edit_product/<int:product_id>', methods=['POST'])
-@login_required
+@admin_required
 def edit_product(product_id):
-    if session.get('role') != 'admin':
-        flash('Unauthorized', 'danger')
-        return redirect(url_for('admin_panel'))
-
     name = request.form.get('name')
     price = request.form.get('price')
     stock_qty = request.form.get('stock_quantity', type=int)
@@ -450,15 +539,11 @@ def edit_product(product_id):
         print(f"Error updating product: {e}")
         flash("Error updating product.", 'danger')
 
-    return redirect(url_for('admin_panel'))
+    return redirect(url_for('admin'))
 
 @app.route('/delete_product/<int:product_id>')
-@login_required
+@admin_required
 def delete_product(product_id):
-    if session.get('role') != 'admin':
-        flash('Unauthorized', 'danger')
-        return redirect(url_for('admin_panel'))
-
     try:
         with db_transaction() as (conn, cursor):
             # Check if product exists and has any order history
@@ -467,14 +552,14 @@ def delete_product(product_id):
             
             if not product:
                 flash('Product not found.', 'danger')
-                return redirect(url_for('admin_panel'))
+                return redirect(url_for('admin'))
             
             cursor.execute("SELECT COUNT(*) as order_count FROM order_items WHERE product_id = %s", (product_id,))
             order_check = cursor.fetchone()
             
             if order_check['order_count'] > 0:
                 flash(f'Cannot delete {product["name"]} - it has order history. Consider deactivating instead.', 'warning')
-                return redirect(url_for('admin_panel'))
+                return redirect(url_for('admin'))
             
             cursor.execute("DELETE FROM products WHERE id = %s", (product_id,))
             flash(f'Product "{product["name"]}" deleted successfully!', 'success')
@@ -483,7 +568,89 @@ def delete_product(product_id):
         print(f"Error deleting product: {e}")
         flash("Error deleting product.", 'danger')
 
-    return redirect(url_for('admin_panel'))
+    return redirect(url_for('admin'))
+
+# --- Staff Routes ---
+@app.route('/staff')
+@staff_required
+def staff():
+    try:
+        with db_transaction() as (conn, cursor):
+            # Fetch orders
+            cursor.execute("""
+                SELECT o.id, o.total, o.status, o.created_at, u.name as user_name, u.email as user_email
+                FROM orders o
+                JOIN users u ON o.user_id = u.id
+                ORDER BY o.created_at DESC
+            """)
+            orders = cursor.fetchall()
+
+            # Fetch inventory
+            cursor.execute("SELECT id, name, price, stock_quantity, description, image, is_active FROM products ORDER BY name")
+            products = cursor.fetchall()
+
+            return render_template('staff.html', orders=orders, products=products)
+    except Exception as e:
+        print(f"Error loading staff page: {e}")
+        flash('Error loading staff page.', 'danger')
+        return redirect(url_for('home'))
+
+@app.route('/staff/order/<int:order_id>/update', methods=['POST'])
+@staff_required
+def update_order_status(order_id):
+    new_status = request.form.get('status')
+    if not new_status:
+        flash('No status provided.', 'danger')
+        return redirect(url_for('staff'))
+
+    try:
+        with db_transaction() as (conn, cursor):
+            cursor.execute(
+                "UPDATE orders SET status = %s WHERE id = %s",
+                (new_status, order_id)
+            )
+            flash(f'Order #{order_id} status updated to {new_status}.', 'success')
+    except Exception as e:
+        print(f"Error updating order status: {e}")
+        flash('Error updating order status.', 'danger')
+    
+    return redirect(url_for('staff'))
+
+# --- Admin Routes ---
+@app.route('/admin/user/<int:user_id>/role', methods=['POST'])
+@admin_required
+def update_user_role(user_id):
+    new_role = request.form.get('role')
+    if not new_role in ['customer', 'staff', 'admin']:
+        flash('Invalid role specified.', 'danger')
+        return redirect(url_for('admin'))
+    
+    try:
+        with db_transaction() as (conn, cursor):
+            cursor.execute("UPDATE users SET role = %s WHERE id = %s", (new_role, user_id))
+            flash('User role updated successfully.', 'success')
+    except Exception as e:
+        print(f"Error updating user role: {e}")
+        flash('Error updating user role.', 'danger')
+        
+    return redirect(url_for('admin'))
+
+@app.route('/admin/user/<int:user_id>/delete', methods=['POST'])
+@admin_required
+def delete_user(user_id):
+    if user_id == session.get('user_id'):
+        flash("You cannot delete your own account.", 'danger')
+        return redirect(url_for('admin'))
+        
+    try:
+        with db_transaction() as (conn, cursor):
+            cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+            flash('User deleted successfully.', 'success')
+    except Exception as e:
+        print(f"Error deleting user: {e}")
+        flash('Error deleting user.', 'danger')
+        
+    return redirect(url_for('admin'))
 
 if __name__ == '__main__':
     app.run(debug=True)

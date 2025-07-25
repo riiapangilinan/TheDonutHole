@@ -2204,13 +2204,9 @@ textarea.input-field {
 
   .alert .message-content {
       flex-grow: 1;
-<<<<<<< HEAD
   }
 
 ::-webkit-file-upload-button,
 ::file-selector-button {
   display: none;
 }
-=======
-  }
->>>>>>> 649e54f7848e54f63d5ebedea327f54df22fdf16

@@ -30,13 +30,20 @@
           </div>
 
           {% if 'email' in session %}
-          <button class="btn btn-primary add-to-cart"
-                  data-id="{{ item.id }}"
-                  data-name="{{ item.name }}"
-                  data-price="{{ item.price }}">
-            <span class="text text-1">Add to Cart</span>
-            <span class="text text-2" aria-hidden="true">Add to Cart</span>
-          </button>
+            {% if item.is_active %}
+              <button class="btn btn-primary add-to-cart"
+                      data-id="{{ item.id }}"
+                      data-name="{{ item.name }}"
+                      data-price="{{ item.price }}">
+                <span class="text text-1">Add to Cart</span>
+                <span class="text text-2" aria-hidden="true">Add to Cart</span>
+              </button>
+            {% else %}
+              <button class="btn btn-secondary" disabled>
+                <span class="text text-1">Not Available</span>
+                <span class="text text-2" aria-hidden="true">Not Available</span>
+              </button>
+            {% endif %}
           {% else %}
           <a href="{{ url_for('login', next=url_for('menu')) }}" class="btn btn-primary">
             <span class="text text-1">Login to Order</span>
@@ -66,13 +73,20 @@
           </div>
 
           {% if 'email' in session %}
-          <button class="btn btn-primary add-to-cart"
-                  data-id="{{ item.id }}"
-                  data-name="{{ item.name }}"
-                  data-price="{{ item.price }}">
-            <span class="text text-1">Add to Cart</span>
-            <span class="text text-2" aria-hidden="true">Add to Cart</span>
-          </button>
+            {% if item.is_active %}
+              <button class="btn btn-primary add-to-cart"
+                      data-id="{{ item.id }}"
+                      data-name="{{ item.name }}"
+                      data-price="{{ item.price }}">
+                <span class="text text-1">Add to Cart</span>
+                <span class="text text-2" aria-hidden="true">Add to Cart</span>
+              </button>
+            {% else %}
+              <button class="btn btn-secondary" disabled>
+                <span class="text text-1">Not Available</span>
+                <span class="text text-2" aria-hidden="true">Not Available</span>
+              </button>
+            {% endif %}
           {% else %}
           <a href="{{ url_for('login', next=url_for('menu')) }}" class="btn btn-primary">
             <span class="text text-1">Login to Order</span>

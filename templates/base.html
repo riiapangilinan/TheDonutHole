@@ -139,6 +139,24 @@
       </a>
   </li>
   {% endif %}
+
+  {% if session.role == 'staff' or session.role == 'admin' %}
+  <li class="navbar-item">
+      <a href="{{ url_for('staff') }}" class="navbar-link hover-underline {% if 'staff' in request.path %}active{% endif %}">
+          <div class="separator"></div>
+          <span class="span">Manage Orders</span>
+      </a>
+  </li>
+  {% endif %}
+
+  {% if session.role == 'admin' %}
+  <li class="navbar-item">
+    <a href="{{ url_for('admin') }}" class="navbar-link hover-underline {% if 'admin' in request.path %}active{% endif %}">
+      <div class="separator"></div>
+      <span class="span">Admin</span>
+    </a>
+  </li>
+  {% endif %}
 </ul>
 
 

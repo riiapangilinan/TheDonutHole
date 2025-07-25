@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block topbar %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block content %}
+<section class="section" aria-label="Staff Panel" style="padding: 40px 0; margin-top: 130px;">
+  <div class="container" style="max-width: 1500px; margin: 0 auto;">
+    <p class="section-subtitle text-center label-2" style="color: #6c757d;">Staff Panel</p>
+    <h2 class="headline-1 section-title text-center" style="margin-bottom: 30px;">Dashboard</h2>
+    <div class="row" style="gap: 20px; display: flex; justify-content: space-between;">
+
+
+      <!-- View Inventory Panel -->
+      <div class="col-12 col-md-4" style="flex: 0 0 20%;">
+        <div style="background: rgb(41, 41, 41); padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 20px; height: 100%;">
+          <p class="section-subtitle text-center label-2" style="color: #6c757d;">View Inventory</p>
+          <div style="height: 600px; overflow-y: auto;">
+            {% for product in products %}
+            <div style="display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #3f3f3f">
+              {% if product.image %}
+                <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 12px;">
+              {% else %}
+                <div style="width: 50px; height: 50px; background: #dee2e6; border-radius: 4px; margin-right: 12px;"></div>
+              {% endif %}
+              <div style="flex-grow: 1;">
+                <div style="color: #fcfcfc;">{{ product.name }}</div>
+                <div style="font-size: 15px; color: #999999;">₱{{ '%.2f'|format(product.price) }} &bull; Stock: {{ product.stock_quantity }}{% if not product.is_active %} <em>(Inactive)</em>{% endif %}</div>
+              </div>
+            </div>
+            {% else %}
+            <p class="text-center" style="color: #fcfcfc; margin-top: 20px;">No products found.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Manage Orders Panel -->
+      <div class="col-12 col-md-8" style="flex: 1;">
+        <div style="background: rgb(41, 41, 41); padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 20px; height: 100%;">
+          <p class="section-subtitle text-center label-2" style="color: #6c757d;">Manage Orders</p>
+          <div style="overflow-x: auto;">
+            <table class="table table-striped" style="width: 100%; color: #fcfcfc; margin: auto;">
+              <thead>
+                <tr style="height:60px;">
+                  <th style="text-align: center; vertical-align: middle;">Order ID</th>
+                  <th style="text-align: center; vertical-align: middle;">Customer</th>
+                  <th style="text-align: center; vertical-align: middle;">Date</th>
+                  <th style="text-align: center; vertical-align: middle;">Total</th>
+                  <th style="text-align: center; vertical-align: middle;">Status</th>
+                  <th style="text-align: center; vertical-align: middle;">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for order in orders %}
+                <tr style="height:60px;">
+                  <td style="text-align: center; vertical-align: middle;">{{ order.id }}</td>
+                  <td style="text-align: center; vertical-align: middle;">{{ order.user_name }} ({{ order.user_email }})</td>
+                  <td style="text-align: center; vertical-align: middle;">{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                  <td style="text-align: center; vertical-align: middle;">₱{{ "%.2f"|format(order.total) }}</td>
+                  <td style="text-align: center; vertical-align: middle;">{{ order.status }}</td>
+                  <td style="text-align: center; vertical-align: middle;">
+                    <form action="{{ url_for('update_order_status', order_id=order.id) }}" method="POST" style="display: flex; align-items: center; justify-content: center;">
+                      <select name="status" class="input-field" style="margin-right: 5px; height: 40px; width: 120px;">
+                        {% set statuses = ['Pending', 'Processing', 'Paid', 'Shipped', 'Delivered', 'Cancelled'] %}
+                        {% for s in statuses %}
+                        <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                      </select>
+                      <button type="submit" class="btn btn-primary">
+                        <span class="text text-1">Update</span>
+                        <span class="text text-2" aria-hidden="true">Update</span>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="6" class="text-center" style="height:60px; vertical-align: middle;">No orders found.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -20,10 +20,26 @@
       </select>
     </div>
 
+    <!-- Data container for cart -->
+    <div id="cart-data-container" data-cart='{{ cart|tojson|safe }}'></div>
+
     <!-- Order Summary -->
-    <div id="checkoutSummary" style="margin-bottom: 2rem;"></div>
+    <div id="checkoutSummary" style="margin-bottom: 2rem;">
+      <h3>Order Summary</h3>
+      {% if cart %}
+      <ul>
+        {% for item_id, item in cart.items() %}
+        <li>{{ item.name }} (x{{ item.quantity }}) - ₱{{ "%.2f"|format(item.price * item.quantity) }}</li>
+        {% endfor %}
+      </ul>
+      <p><strong>Total:</strong> ₱{{ "%.2f"|format(total) }}</p>
+      {% else %}
+      <p>Your cart is empty.</p>
+      {% endif %}
+    </div>
 
     <!-- Checkout Form -->
+    {% if cart %}
     <form id="checkoutForm" method="POST" action="{{ url_for('submit_checkout') }}">
       <div class="form-group" style="margin-bottom: 1rem;">
         <label for="name">Full Name</label>
@@ -46,57 +62,51 @@
       </div>
 
       <!-- Hidden input to send cart data to backend -->
-      <input type="hidden" name="cart_data" id="cart_data">
+      <input type="hidden" name="cart_data" id="cart_data" value='{{ cart | tojson }}'>
 
       <button type="submit" class="btn btn-primary w-100">Place Order</button>
     </form>
+    {% endif %}
   </div>
 </section>
 
 <script>
-  const cart = JSON.parse(sessionStorage.getItem('cart')) || JSON.parse(localStorage.getItem('cart')) || [];
-  const summary = document.getElementById('checkoutSummary');
-  const currencySelector = document.getElementById('currency');
-  const cartDataInput = document.getElementById('cart_data');
-  const checkoutForm = document.getElementById('checkoutForm');
+  document.addEventListener('DOMContentLoaded', function() {
+    const currencySelector = document.getElementById('currency');
+    const summaryContainer = document.getElementById('checkoutSummary');
+    const cartDataElement = document.getElementById('cart-data-container');
+    const originalCartData = JSON.parse(cartDataElement.dataset.cart || '{}');
 
-  function renderSummary() {
-    if (!Array.isArray(cart) || cart.length === 0) {
-      summary.innerHTML = '<p>Your cart is empty.</p>';
-      checkoutForm.style.display = 'none';
-      return;
+    function renderSummary() {
+      const selectedOption = currencySelector.options[currencySelector.selectedIndex];
+      const rate = parseFloat(selectedOption.dataset.rate) || 1;
+      const symbol = selectedOption.dataset.symbol || '₱';
+
+      if (Object.keys(originalCartData).length === 0) {
+        summaryContainer.innerHTML = '<h3>Order Summary</h3><p>Your cart is empty.</p>';
+        return;
+      }
+
+      let html = '<h3>Order Summary</h3><ul>';
+      let newTotal = 0;
+
+      for (const itemId in originalCartData) {
+        const item = originalCartData[itemId];
+        const priceInPHP = parseFloat(item.price);
+        const priceInSelectedCurrency = priceInPHP / rate;
+        const itemTotal = priceInSelectedCurrency * item.quantity;
+        newTotal += itemTotal;
+        html += `<li>${item.name} (x${item.quantity}) - ${symbol}${itemTotal.toFixed(2)}</li>`;
+      }
+
+      html += `</ul><p><strong>Total:</strong> ${symbol}${newTotal.toFixed(2)}</p>`;
+      summaryContainer.innerHTML = html;
     }
 
-    checkoutForm.style.display = 'block';
+    currencySelector.addEventListener('change', renderSummary);
 
-    const selectedOption = currencySelector.options[currencySelector.selectedIndex];
-    const rate = parseFloat(selectedOption.dataset.rate) || 1;
-    const symbol = selectedOption.dataset.symbol || '';
-
-    let html = '<h3>Order Summary</h3><ul>';
-    let total = 0;
-
-    cart.forEach(item => {
-      const name = item.name || 'Unnamed Item';
-      const quantity = parseInt(item.quantity) || 1;
-      const priceInPHP = parseFloat(item.price) || 0;
-      const priceInSelectedCurrency = priceInPHP / rate;
-      const itemTotal = priceInSelectedCurrency * quantity;
-
-      html += `<li>${name} (x${quantity}) - ${symbol}${itemTotal.toFixed(2)}</li>`;
-      total += itemTotal;
-    });
-
-    html += `</ul><p><strong>Total:</strong> ${symbol}${total.toFixed(2)}</p>`;
-    summary.innerHTML = html;
-  }
-
-  currencySelector.addEventListener('change', renderSummary);
-
-  checkoutForm.addEventListener('submit', () => {
-    cartDataInput.value = JSON.stringify(cart);
+    // Initial render
+    renderSummary();
   });
-
-  renderSummary();
 </script>
 {% endblock %}
