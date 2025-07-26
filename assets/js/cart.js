@@ -132,17 +132,56 @@ document.addEventListener('DOMContentLoaded', function () {
     cartOverlay.addEventListener('click', toggleCart);
 
     // Initial load of the cart from the session on page load
-    // This assumes the cart is loaded into the session by Flask on login
-    fetch('/cart')
-        .then(response => response.text()) // Get HTML content
-        .then(html => {
-            // This is a trick to get the cart data without a dedicated API endpoint
-            // It relies on the cart data being available in the session when the page loads
-            // A better approach would be a dedicated '/get_cart' endpoint
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
-            // Assuming the cart data is somehow embedded or can be inferred
-            // For now, we'll just render what's in the session on the backend
-        })
-        .catch(err => console.error("Could not pre-load cart state.", err));
+    function loadCartOnPageLoad() {
+        fetch('/cart')
+            .then(response => {
+                if (!response.ok) {
+                    // If the user is not logged in, this will likely fail.
+                    // We can ignore this error as the cart is only for logged-in users.
+                    return Promise.reject('Not logged in or cart is empty');
+                }
+                return response.text();
+            })
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const cartRows = doc.querySelectorAll('table tbody tr');
+                
+                if (cartRows.length === 0) {
+                    updateCartUI({ cart: {}, cart_count: 0, cart_total: 0 });
+                    return;
+                }
+
+                const cartData = { cart: {}, cart_count: 0, cart_total: 0 };
+                let totalItems = 0;
+                let totalValue = 0;
+
+                cartRows.forEach(row => {
+                    const name = row.cells[0].textContent.trim();
+                    const priceText = row.cells[1].textContent.trim().replace('₱', '');
+                    const quantityText = row.cells[2].textContent.trim();
+                    const id = row.querySelector('input[name="item_id"]').value;
+
+                    const price = parseFloat(priceText);
+                    const quantity = parseInt(quantityText, 10);
+
+                    cartData.cart[id] = { id, name, price, quantity };
+                    totalItems += quantity;
+                    totalValue += price * quantity;
+                });
+
+                cartData.cart_count = totalItems;
+                cartData.cart_total = totalValue;
+                
+                updateCartUI(cartData);
+            })
+            .catch(err => {
+                // This error is expected if the user is not logged in.
+                // We can safely ignore it and show an empty cart.
+                console.log("Cart pre-load skipped (user may not be logged in).");
+                updateCartUI({ cart: {}, cart_count: 0, cart_total: 0 });
+            });
+    }
+
+    loadCartOnPageLoad();
 });
