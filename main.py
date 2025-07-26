@@ -576,14 +576,43 @@ def delete_product(product_id):
 def staff():
     try:
         with db_transaction() as (conn, cursor):
-            # Fetch orders
+            # Fetch orders with associated products
             cursor.execute("""
-                SELECT o.id, o.total, o.status, o.created_at, u.name as user_name, u.email as user_email
+                SELECT 
+                    o.id, o.total, o.status, o.created_at, 
+                    u.name as user_name, u.email as user_email,
+                    p.name as product_name, oi.quantity, oi.price
                 FROM orders o
                 JOIN users u ON o.user_id = u.id
-                ORDER BY o.created_at DESC
+                LEFT JOIN order_items oi ON o.id = oi.order_id
+                LEFT JOIN products p ON oi.product_id = p.id
+                ORDER BY o.created_at DESC, o.id
             """)
-            orders = cursor.fetchall()
+            
+            order_details = cursor.fetchall()
+            
+            orders_dict = {}
+            for item in order_details:
+                order_id = item['id']
+                if order_id not in orders_dict:
+                    orders_dict[order_id] = {
+                        'id': order_id,
+                        'total': item['total'],
+                        'status': item['status'],
+                        'created_at': item['created_at'],
+                        'user_name': item['user_name'],
+                        'user_email': item['user_email'],
+                        'products': []
+                    }
+                
+                if item['product_name']:
+                    orders_dict[order_id]['products'].append({
+                        'name': item['product_name'],
+                        'quantity': item['quantity'],
+                        'price': item['price']
+                    })
+
+            orders = list(orders_dict.values())
 
             # Fetch inventory
             cursor.execute("SELECT id, name, price, stock_quantity, description, image, is_active FROM products ORDER BY name")

@@ -481,7 +481,8 @@ body.nav-active { overflow: hidden; }
   background-color: var(--eerie-black-2);
   color: var(--white);
   height: 56px;
-  padding: 10px 20px;
+  margin-top: 20.5px;
+  padding-left: 10px;
   border: 1px solid var(--white-alpha-10);
   margin-block-end: 20px;
   outline: none;
@@ -2209,4 +2210,161 @@ textarea.input-field {
 ::-webkit-file-upload-button,
 ::file-selector-button {
   display: none;
+}
+
+
+/*-----------------------------------*\
+  #STAFF PANEL
+\*-----------------------------------*/
+
+.staff-section {
+  padding: 40px 0;
+  margin-top: 130px;
+}
+
+.staff-container {
+  max-width: 1500px;
+  margin: 0 auto;
+  gap: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.staff-panel {
+  background: rgb(41, 41, 41);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+  height: 100%;
+}
+
+.staff-panel.inventory {
+  flex: 0 0 20%;
+}
+
+.staff-panel.orders {
+  flex: 1;
+}
+
+.staff-panel .panel-content {
+  height: 600px;
+  overflow-y: auto;
+}
+
+.staff-panel .panel-content.orders-table-container {
+  height: auto;
+  overflow-x: auto;
+}
+
+.inventory-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #3f3f3f;
+}
+
+.inventory-item-img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 12px;
+}
+
+.inventory-item-placeholder {
+  width: 50px;
+  height: 50px;
+  background: #dee2e6;
+  border-radius: 4px;
+  margin-right: 12px;
+}
+
+.inventory-item-details {
+  flex-grow: 1;
+}
+
+.inventory-item-name {
+  color: #fcfcfc;
+}
+
+.inventory-item-info {
+  font-size: 15px;
+  color: #999999;
+}
+
+.orders-table {
+  width: 100%;
+  color: #fcfcfc;
+  margin: auto;
+}
+
+.orders-table th,
+.orders-table td {
+  text-align: center;
+}
+
+.orders-table thead tr {
+  height: 60px;
+}
+
+.orders-table tbody tr {
+  height: 60px;
+  border-bottom: 1px solid #555;
+}
+
+.action-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.action-container .update-form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-container .status-select {
+  margin-right: 5px;
+  height: 40px;
+  width: 120px;
+  vertical-align: middle;
+}
+
+.action-container .btn {
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+
+.products-row {
+  display: none;
+  background-color: #2e2e2e;
+}
+
+.products-cell {
+  padding: 15px;
+  text-align: left;
+}
+
+.products-cell h4 {
+  color: #fcfcfc;
+  margin-bottom: 10px;
+}
+
+.products-cell ul {
+  list-style: none;
+  padding: 0;
+}
+
+.products-cell li {
+  margin-bottom: 5px;
+}
+
+.action-cell {
+  vertical-align: middle;
+  text-align: center;
 }
