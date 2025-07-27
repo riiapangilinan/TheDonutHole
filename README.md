@@ -2,13 +2,14 @@
 
 ## Project Overview
 
-The Donut Hole is a full-stack web application for an online donut shop. It's built with Python's Flask framework on the backend, a MySQL database for data persistence, and standard HTML, CSS, and JavaScript on the frontend. The application provides features for customers to browse products, manage a shopping cart, and place orders. It also includes an admin panel for managing products.
+The Donut Hole is a full-stack web application for an online donut shop. It's built with Python's Flask framework on the backend, a MySQL database for data persistence, and standard HTML, CSS, and JavaScript on the frontend. The application provides features for customers to browse products, manage a shopping cart, and place orders. It also includes an admin panel for managing products and users, and a staff panel for order fulfillment.
 
 ## Core Technologies
 
 *   **Backend:** Python, Flask
 *   **Database:** MySQL
 *   **Frontend:** HTML, CSS, JavaScript
+*   **Environment Management:** python-dotenv
 *   **Deployment:** (Not specified, but can be deployed on any server that supports Python/WSGI)
 
 ## Features
@@ -22,7 +23,7 @@ The Donut Hole is a full-stack web application for an online donut shop. It's bu
     *   Add items to the cart.
     *   Increase/decrease item quantities.
     *   Remove items from the cart.
-    *   Cart data is stored in the user's session.
+    *   Cart data is persisted in the database, linked to the user's account.
 *   **User Authentication:**
     *   User registration with email and password.
     *   User login.
@@ -43,35 +44,54 @@ The Donut Hole is a full-stack web application for an online donut shop. It's bu
     *   Edit existing products.
     *   Deactivate or delete products.
     *   Products with order history cannot be deleted, preventing data integrity issues.
+*   **User Management:**
+    *   View all registered users.
+    *   Update user roles (customer, staff, admin).
+    *   Delete users.
 *   **Role-Based Access Control:** Only users with the 'admin' role can access the admin panel.
+
+### Staff Features
+
+*   **Staff Panel:** A dedicated section for staff members to manage incoming orders.
+*   **Order Management:**
+    *   View all customer orders and their details.
+    *   Update the status of orders (e.g., 'Processing', 'Shipped', 'Delivered').
+*   **Inventory Overview:** View current stock levels of all products.
+*   **Role-Based Access Control:** Accessible to users with 'staff' or 'admin' roles.
 
 ## Database Schema
 
 The application uses a MySQL database named `donut_hole`. The schema consists of the following tables:
 
-*   `users`: Stores user information, including credentials and roles.
+*   `users`: Stores user information, credentials, and roles (`customer`, `staff`, `admin`).
 *   `products`: Contains details about the donuts, including price and stock levels.
-*   `orders`: Header table for customer orders.
+*   `user_carts`: Persists shopping cart contents for each user.
+*   `orders`: Header table for customer orders with status tracking.
 *   `order_items`: Line items for each order, linking products to orders.
 *   `currencies`: Stores currency information for the checkout process.
 *   `transactions`: Records payment transactions for each order.
+*   `product_updates`: An archive table that logs all changes made to products.
+*   `phased_out_products`: An archive table for products that have been deleted.
+*   `low_stock_products`: A log table that records when a product's stock falls below a certain threshold.
 
 ### Stored Procedures & Triggers
 
 The database makes extensive use of stored procedures and triggers to enforce business logic and maintain data integrity:
 
 *   **Stored Procedures:**
+    *   `get_user_orders`: Retrieves all orders for a specific user.
     *   `add_product`: Adds a new product.
     *   `update_product_stock`: Decrements stock when an order is placed.
     *   `create_order`: Creates a new order.
     *   `add_order_item`: Adds an item to an order.
     *   `record_transaction`: Records a payment transaction.
 *   **Triggers:**
-    *   `product_update`: Archives product changes.
-    *   `deleted_products_archive`: Archives deleted products.
-    *   `prevent_negative_stock`: Prevents stock from going below zero.
-    *   `prevent_negative_new_product`: Ensures new products have a stock greater than 0.
-    *   `low_stock_alerts`: Logs when product stock falls below a certain threshold.
+    *   `product_update`: Archives product changes into the `product_updates` table.
+    *   `deleted_products_archive`: Archives deleted products into the `phased_out_products` table.
+    *   `prevent_negative_stock`: Prevents product stock from going below zero on update.
+    *   `prevent_negative_new_product`: Ensures new products have a stock greater than 0 on insert.
+    *   `low_stock_alerts`: Logs when product stock falls below a certain threshold into the `low_stock_products` table.
+*   **Database Roles:** The database implements Role-Based Access Control (RBAC) with `customer_role`, `staff_role`, and `admin_role` to enforce security at the database level.
 
 ## Setup and Installation
 
@@ -92,22 +112,31 @@ The database makes extensive use of stored procedures and triggers to enforce bu
     mysql -u your_username -p < donut_db.sql
     ```
 
-4.  **Install dependencies:**
+4.  **Create an Environment File:**
+    *   Create a file named `.env` in the root of the project directory.
+    *   Add the following environment variables to the `.env` file, replacing the placeholder values with your actual database credentials:
+    ```
+    DB_HOST=localhost
+    DB_USER=your_db_user
+    DB_PASSWORD=your_db_password
+    DB_NAME=donut_hole
+    ```
+
+5.  **Install dependencies:**
     *   It is recommended to use a virtual environment.
     ```bash
     python -m venv venv
     source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
     ```
-    *   The `requirements.txt` file is incomplete. You will need to install the following packages:
+    *   Install the required packages from `requirements.txt` (or install them manually):
     ```bash
-    pip install Flask mysql-connector-python Werkzeug
+    pip install Flask mysql-connector-python Werkzeug python-dotenv
     ```
 
-5.  **Configure the application:**
-    *   Open `main.py` and update the database connection details in the `get_db_connection` function if they differ from the defaults (user: 'admin', password: 'DLSU1234').
-    *   Change the `app.secret_key`.
+6.  **Configure the application:**
+    *   Open `main.py` and change the `app.secret_key` to a unique, secret string.
 
-6.  **Run the application:**
+7.  **Run the application:**
     ```bash
     python main.py
     ```
@@ -124,7 +153,8 @@ The database makes extensive use of stored procedures and triggers to enforce bu
     *   `js/`: JavaScript files.
     *   `images/`: Images used in the application.
 *   `donut_db.sql`: The database schema and initial data.
-*   `requirements.txt`: (Incomplete) Lists Python dependencies.
+*   `requirements.txt`: Lists Python dependencies.
+*   `.env`: (Locally created) Stores environment variables for database configuration.
 
 ## How to Use
 
@@ -139,4 +169,9 @@ The database makes extensive use of stored procedures and triggers to enforce bu
     *   View your order history.
 3.  **As an admin:**
     *   Log in with the admin account. You will be redirected to the admin panel.
-    *   Add, edit, or delete products.
+    *   Manage products (add, edit, delete).
+    *   Manage users (update roles, delete).
+4.  **As a staff member:**
+    *   Log in with a staff account. You will be redirected to the staff panel.
+    *   View all customer orders.
+    *   Update order statuses to reflect the fulfillment process.
