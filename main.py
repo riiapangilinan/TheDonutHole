@@ -389,17 +389,20 @@ def submit_checkout():
                 if product['stock_quantity'] < item['quantity']:
                     raise Exception(f"Insufficient stock for {item['name']}. Available: {product['stock_quantity']}, Requested: {item['quantity']}")
 
-            # Step 2: Create order and record transaction in one go
+            # Step 2: Create order and get the new order_id
             cart_json_for_db = json.dumps(cart)
             cursor.callproc('create_order', (user_id, total, cart_json_for_db))
-
-            # Fetch the last inserted ID from the orders table
-            cursor.execute("SELECT LAST_INSERT_ID() as id")
-            order_id_result = cursor.fetchone()
-            order_id = order_id_result['id'] if order_id_result else None
+            
+            # Fetch the order_id from the result of the stored procedure
+            order_id = None
+            for result in cursor.stored_results():
+                order_id_result = result.fetchone()
+                if order_id_result:
+                    order_id = order_id_result['order_id']
+                    break
 
             if not order_id:
-                raise Exception("Failed to create order")
+                raise Exception("Failed to create order or retrieve order ID")
 
             # Step 3: Record transaction
             cursor.callproc('record_transaction', (order_id, total, payment_method, 'Success'))

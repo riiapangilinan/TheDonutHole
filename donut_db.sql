@@ -124,29 +124,26 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS create_order;
 DELIMITER //
-CREATE PROCEDURE create_order(IN p_user_id INT, IN p_total DECIMAL(10,2), IN p_items JSON)
+CREATE PROCEDURE create_order(
+    IN p_user_id INT, 
+    IN p_total DECIMAL(10,2), 
+    IN p_items JSON
+)
 BEGIN
-    DECLARE order_id INT;
+    DECLARE p_order_id INT;
     DECLARE i INT DEFAULT 0;
     DECLARE item_count INT;
     DECLARE p_id INT;
     DECLARE p_qty INT;
     DECLARE p_price DECIMAL(10, 2);
 
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        RESIGNAL;
-    END;
-
-    START TRANSACTION;
 
     IF (SELECT COUNT(*) FROM users WHERE id = p_user_id) = 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'User does not exist.';
     END IF;
 
     INSERT INTO orders (user_id, total, status) VALUES (p_user_id, p_total, 'Paid');
-    SET order_id = LAST_INSERT_ID();
+    SET p_order_id = LAST_INSERT_ID();
 
     SET item_count = JSON_LENGTH(p_items);
 
@@ -156,14 +153,15 @@ BEGIN
         SET p_price = JSON_UNQUOTE(JSON_EXTRACT(p_items, CONCAT('$[', i, '].price')));
 
         INSERT INTO order_items (order_id, product_id, quantity, price)
-        VALUES (order_id, p_id, p_qty, p_price);
+        VALUES (p_order_id, p_id, p_qty, p_price);
 
         UPDATE products SET stock_quantity = stock_quantity - p_qty WHERE id = p_id;
 
         SET i = i + 1;
     END WHILE;
 
-    COMMIT;
+    SELECT p_order_id as order_id;
+
 END //
 DELIMITER ;
 
