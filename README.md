@@ -79,18 +79,18 @@ The application uses a MySQL database named `donut_hole`. The schema consists of
 The database makes extensive use of stored procedures and triggers to enforce business logic and maintain data integrity:
 
 *   **Stored Procedures:**
-    *   `get_user_orders`: Retrieves all orders for a specific user.
-    *   `add_product`: Adds a new product.
-    *   `update_product_stock`: Decrements stock when an order is placed.
-    *   `create_order`: Creates a new order.
-    *   `add_order_item`: Adds an item to an order.
-    *   `record_transaction`: Records a payment transaction.
+    *   `get_user_orders(p_user_id)`: Retrieves the order history for a specific user.
+    *   `add_product(pname, pdesc, pprice, pstock, p_image)`: Adds a new product to the `products` table.
+    *   `create_order(p_user_id, p_total, p_items)`: Creates a new order, adds items, and decrements stock.
+    *   `record_transaction(...)`: Records a payment transaction.
+    *   `update_user_role(p_user_id, p_new_role)`: Updates the role of a user.
 *   **Triggers:**
-    *   `product_update`: Archives product changes into the `product_updates` table.
-    *   `deleted_products_archive`: Archives deleted products into the `phased_out_products` table.
-    *   `prevent_negative_stock`: Prevents product stock from going below zero on update.
-    *   `prevent_negative_new_product`: Ensures new products have a stock greater than 0 on insert.
-    *   `low_stock_alerts`: Logs when product stock falls below a certain threshold into the `low_stock_products` table.
+    *   `product_update`: Archives product changes.
+    *   `deleted_products_archive`: Archives deleted products.
+    *   `prevent_negative_stock`: Prevents stock from going below zero.
+    *   `prevent_negative_new_product`: Ensures new products have positive stock.
+    *   `low_stock_alerts`: Logs low stock products.
+    *   `return_stock_on_cancellation`: Returns stock to inventory if an order is cancelled.
 *   **Database Roles:** The database implements Role-Based Access Control (RBAC) with `customer_role`, `staff_role`, and `admin_role` to enforce security at the database level.
 
 ## Setup and Installation

@@ -324,4 +324,14 @@ GRANT SELECT ON donut_hole.low_stock_products TO 'admin_role';
 GRANT SELECT ON donut_hole.transactions TO 'admin_role';
 GRANT EXECUTE ON PROCEDURE donut_hole.add_product TO 'admin_role';
 
+DROP PROCEDURE IF EXISTS update_user_role;
+DELIMITER //
+CREATE PROCEDURE update_user_role(IN p_user_id INT, IN p_new_role VARCHAR(50))
+BEGIN
+    UPDATE users SET role = p_new_role WHERE id = p_user_id;
+END //
+DELIMITER ;
+
+GRANT EXECUTE ON PROCEDURE donut_hole.update_user_role TO 'admin_role';
+
 FLUSH PRIVILEGES;

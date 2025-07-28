@@ -32,7 +32,6 @@ def get_db_connection():
         print("MySQL connection error:", e)
         return None
 
-# Context manager for database transactions
 @contextmanager
 def db_transaction():
     """Context manager that handles database transactions with automatic rollback on errors"""
@@ -647,7 +646,7 @@ def update_user_role(user_id):
     
     try:
         with db_transaction() as (conn, cursor):
-            cursor.execute("UPDATE users SET role = %s WHERE id = %s", (new_role, user_id))
+            cursor.callproc('update_user_role', (user_id, new_role))
             flash('User role updated successfully.', 'success')
     except Exception as e:
         print(f"Error updating user role: {e}")

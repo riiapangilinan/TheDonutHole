@@ -29,6 +29,7 @@ The database utilizes stored procedures to encapsulate and centralize key busine
 - **`add_product(pname, pdesc, pprice, pstock, p_image)`**: Adds a new product to the `products` table, including its name, description, price, stock quantity, and image filename.
 - **`create_order(p_user_id, p_total, p_items)`**: Creates a new order, adds the corresponding items to `order_items`, and decrements the stock for each product. This is an atomic transaction.
 - **`record_transaction(...)`**: Records a payment transaction and links it to an order.
+- **`update_user_role(p_user_id, p_new_role)`**: Updates the role of a user.
 
 ### 2.3. Triggers
 
