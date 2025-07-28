@@ -25,7 +25,7 @@ def get_db_connection():
             user=os.getenv('DB_USER'),
             password=os.getenv('DB_PASSWORD'),
             database=os.getenv('DB_NAME'),
-            autocommit=False  # Important: Disable autocommit for transaction control
+            autocommit=False
         )
         return connection
     except Error as e:
@@ -106,7 +106,7 @@ def menu():
         flash('Error loading menu items.', 'danger')
         return render_template('menu.html', menu_items=[])
 
-# --- Enhanced Register with Transaction ---
+# --- Register ---
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -239,7 +239,7 @@ def save_cart_session():
     session.modified = True
     return '', 204
 
-# --- Enhanced Login with Transaction ---
+# --- Login ---
 def _load_cart_from_db(cursor, user_id):
     """Helper function to load cart from DB and store it in the session."""
     cursor.execute("""
@@ -316,7 +316,7 @@ def order_history():
     try:
         with db_transaction() as (conn, cursor):
             cursor.callproc('get_user_orders', (user_id,))
-            # Stored procedures return iterators. We need to fetch results from the correct one.
+
             for result in cursor.stored_results():
                 orders = result.fetchall()
             return render_template('order_history.html', orders=orders)
@@ -350,7 +350,7 @@ def checkout():
         flash('Error loading checkout page.', 'danger')
         return redirect(url_for('cart'))
 
-# --- Enhanced Checkout with Comprehensive Transaction Management ---
+# --- Checkout ---
 @app.route('/submit_checkout', methods=['POST'])
 @login_required
 def submit_checkout():
@@ -389,11 +389,11 @@ def submit_checkout():
                 if product['stock_quantity'] < item['quantity']:
                     raise Exception(f"Insufficient stock for {item['name']}. Available: {product['stock_quantity']}, Requested: {item['quantity']}")
 
-            # Step 2: Create order using stored procedure
-            # The new create_order procedure handles the transaction
-            cursor.callproc('create_order', (user_id, total, None))
-            
-            # Fetch the last inserted ID
+            # Step 2: Create order and record transaction in one go
+            cart_json_for_db = json.dumps(cart)
+            cursor.callproc('create_order', (user_id, total, cart_json_for_db))
+
+            # Fetch the last inserted ID from the orders table
             cursor.execute("SELECT LAST_INSERT_ID() as id")
             order_id_result = cursor.fetchone()
             order_id = order_id_result['id'] if order_id_result else None
@@ -401,15 +401,7 @@ def submit_checkout():
             if not order_id:
                 raise Exception("Failed to create order")
 
-            # Step 3: Add order items and update stock (can be moved into create_order)
-            for item in cart:
-                # Add order item
-                cursor.callproc('add_order_item', (order_id, item['id'], item['quantity'], item['price']))
-                
-                # Update product stock
-                cursor.callproc('update_product_stock', (item['id'], item['quantity']))
-
-            # Step 4: Record transaction
+            # Step 3: Record transaction
             cursor.callproc('record_transaction', (order_id, total, payment_method, 'Success'))
 
             # Step 5: Clear user's cart from the database
@@ -436,7 +428,7 @@ def submit_checkout():
         flash(f"Error placing order: {str(e)}", "danger")
         return redirect(url_for('checkout'))
 
-# -- Enhanced Admin Side with Transactions --
+# -- Admin --
 @app.route('/admin')
 @admin_required
 def admin():
@@ -479,11 +471,7 @@ def add_product():
 
     try:
         with db_transaction() as (conn, cursor):
-            cursor.execute(
-                "INSERT INTO products (name, price, stock_quantity, description, image, is_active) "
-                "VALUES (%s, %s, %s, %s, %s, TRUE)",
-                (name, price, stock_qty, description, filename)
-            )
+            cursor.callproc('add_product', (name, description, price, stock_qty, filename))
             flash('Product added successfully!', 'success')
 
     except mysql.connector.Error as err:

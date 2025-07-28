@@ -2,8 +2,8 @@
 CREATE DATABASE IF NOT EXISTS donut_hole;
 USE donut_hole;
 
--- Drop existing tables if needed (optional cleanup)
-DROP TABLE IF EXISTS transactions, order_items, orders, currencies, products, users, user_carts;
+-- Drop existing tables if needed
+DROP TABLE IF EXISTS transactions, order_items, orders, currencies, products, users, user_carts, product_updates, phased_out_products, low_stock_products;
 
 -- USERS
 CREATE TABLE users (
@@ -42,7 +42,7 @@ CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     total DECIMAL(10, 2) DEFAULT 0.00,
-    status ENUM('Pending', 'Processing', 'Paid', 'Shipped', 'Delivered', 'Cancelled') DEFAULT 'Pending',
+    status ENUM('Paid', 'Cancelled', 'Shipped') DEFAULT 'Paid',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -111,59 +111,62 @@ BEGIN
 END //
 DELIMITER ;
 
+
 DROP PROCEDURE IF EXISTS add_product;
 DELIMITER //
-CREATE PROCEDURE add_product(IN pname VARCHAR(255), IN pdesc TEXT, IN pprice DECIMAL(10,2), IN pstock INT)
+CREATE PROCEDURE add_product(IN pname VARCHAR(255), IN pdesc TEXT, IN pprice DECIMAL(10,2), IN pstock INT, IN p_image VARCHAR(255))
 BEGIN
-    INSERT INTO products (name, description, price, stock, is_active)
-    VALUES (pname, pdesc, pprice, pstock, TRUE);
+    INSERT INTO products (name, description, price, stock_quantity, image, is_active)
+    VALUES (pname, pdesc, pprice, pstock, p_image, TRUE);
 END //
 DELIMITER ;
 
-DROP PROCEDURE IF EXISTS update_product_stock;
-DELIMITER //
-CREATE PROCEDURE update_product_stock(IN pid INT, IN qty INT)
-BEGIN
-    UPDATE products SET stock_quantity = stock_quantity - qty WHERE id = pid;
-END //
-DELIMITER ;
 
 DROP PROCEDURE IF EXISTS create_order;
 DELIMITER //
 CREATE PROCEDURE create_order(IN p_user_id INT, IN p_total DECIMAL(10,2), IN p_items JSON)
 BEGIN
-    -- Declare handler for SQL exceptions
+    DECLARE order_id INT;
+    DECLARE i INT DEFAULT 0;
+    DECLARE item_count INT;
+    DECLARE p_id INT;
+    DECLARE p_qty INT;
+    DECLARE p_price DECIMAL(10, 2);
+
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
-        RESIGNAL; -- Re-throw the exception to the application
+        RESIGNAL;
     END;
 
     START TRANSACTION;
 
-    -- Check if user exists
     IF (SELECT COUNT(*) FROM users WHERE id = p_user_id) = 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'User does not exist.';
     END IF;
 
-    -- Create the main order record
-    INSERT INTO orders (user_id, total, status) VALUES (p_user_id, p_total, 'Pending');
+    INSERT INTO orders (user_id, total, status) VALUES (p_user_id, p_total, 'Paid');
+    SET order_id = LAST_INSERT_ID();
 
-    -- This is a simplified loop. A more robust implementation would parse the JSON array.
-    -- For now, we assume the application layer will call add_order_item in a loop.
-    -- If all operations are successful
+    SET item_count = JSON_LENGTH(p_items);
+
+    WHILE i < item_count DO
+        SET p_id = JSON_UNQUOTE(JSON_EXTRACT(p_items, CONCAT('$[', i, '].id')));
+        SET p_qty = JSON_UNQUOTE(JSON_EXTRACT(p_items, CONCAT('$[', i, '].quantity')));
+        SET p_price = JSON_UNQUOTE(JSON_EXTRACT(p_items, CONCAT('$[', i, '].price')));
+
+        INSERT INTO order_items (order_id, product_id, quantity, price)
+        VALUES (order_id, p_id, p_qty, p_price);
+
+        UPDATE products SET stock_quantity = stock_quantity - p_qty WHERE id = p_id;
+
+        SET i = i + 1;
+    END WHILE;
+
     COMMIT;
 END //
 DELIMITER ;
 
-DROP PROCEDURE IF EXISTS add_order_item;
-DELIMITER //
-CREATE PROCEDURE add_order_item(IN oid INT, IN pid INT, IN qty INT, IN price DECIMAL(10,2))
-BEGIN
-    INSERT INTO order_items (order_id, product_id, quantity, price)
-    VALUES (oid, pid, qty, price);
-END //
-DELIMITER ;
 
 DROP PROCEDURE IF EXISTS record_transaction;
 DELIMITER //
@@ -240,12 +243,12 @@ FOR EACH ROW
 BEGIN
 	IF NEW.stock_quantity < 1 THEN
     SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Indicated Stock is lesser than 0';
+    SET MESSAGE_TEXT = 'Indicated Stock is less than 0';
     END IF;
 END
 // DELIMITER ;
 
--- 5. Low of Stock Product Log
+-- 5. Low Stock Product Log
 CREATE TABLE low_stock_products(
 	entry_id int AUTO_INCREMENT PRIMARY KEY,
     id int,
@@ -266,6 +269,21 @@ BEGIN
 END
 // DELIMITER ;
 
+-- 6. Return Stock on Cancellation
+DELIMITER //
+CREATE TRIGGER return_stock_on_cancellation
+AFTER UPDATE ON orders
+FOR EACH ROW
+BEGIN
+    IF NEW.status = 'Cancelled' AND OLD.status != 'Cancelled' THEN
+        UPDATE products p
+        JOIN order_items oi ON p.id = oi.product_id
+        SET p.stock_quantity = p.stock_quantity + oi.quantity
+        WHERE oi.order_id = NEW.id;
+    END IF;
+END;
+// DELIMITER ;
+
 INSERT INTO users (email, name, password_hash, role)
 VALUES (
   'admin@donuthole.com',
@@ -276,7 +294,7 @@ VALUES (
 
 -- ROLE-BASED ACCESS CONTROL --
 
--- Drop roles if they exist for a clean slate
+-- Drop roles if they exist for a reset
 DROP ROLE IF EXISTS 'customer_role', 'staff_role', 'admin_role';
 
 -- Create the new roles
@@ -288,7 +306,6 @@ CREATE ROLE 'customer_role', 'staff_role', 'admin_role';
 GRANT SELECT ON donut_hole.products TO 'customer_role';
 GRANT SELECT ON donut_hole.currencies TO 'customer_role';
 GRANT EXECUTE ON PROCEDURE donut_hole.create_order TO 'customer_role';
-GRANT EXECUTE ON PROCEDURE donut_hole.add_order_item TO 'customer_role';
 GRANT EXECUTE ON PROCEDURE donut_hole.get_user_orders TO 'customer_role';
 
 -- B. staff_role Permissions

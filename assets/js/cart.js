@@ -71,7 +71,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Event delegation for cart item actions
     cartItemsContainer.addEventListener('click', function(event) {
         const target = event.target;
         const itemId = target.dataset.itemId;
@@ -97,7 +96,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
                 if (!response.ok) {
-                    // If not logged in, the server will redirect, handle this gracefully
                     if (response.redirected) {
                         window.location.href = response.url;
                         return;
@@ -123,7 +121,6 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('Your cart is empty!');
             return;
         }
-        // The cart is already synced with the server, so just redirect
         window.location.href = '/checkout';
     });
 
@@ -136,8 +133,6 @@ document.addEventListener('DOMContentLoaded', function () {
         fetch('/cart')
             .then(response => {
                 if (!response.ok) {
-                    // If the user is not logged in, this will likely fail.
-                    // We can ignore this error as the cart is only for logged-in users.
                     return Promise.reject('Not logged in or cart is empty');
                 }
                 return response.text();
@@ -176,8 +171,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 updateCartUI(cartData);
             })
             .catch(err => {
-                // This error is expected if the user is not logged in.
-                // We can safely ignore it and show an empty cart.
                 console.log("Cart pre-load skipped (user may not be logged in).");
                 updateCartUI({ cart: {}, cart_count: 0, cart_total: 0 });
             });

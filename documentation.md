@@ -26,10 +26,8 @@ The application uses a MySQL database named `donut_hole`. The schema is designed
 The database utilizes stored procedures to encapsulate and centralize key business logic.
 
 - **`get_user_orders(p_user_id)`**: Retrieves the order history for a specific user.
-- **`add_product(...)`**: Adds a new product to the `products` table.
-- **`update_product_stock(pid, qty)`**: Decrements the stock quantity of a product after a purchase.
-- **`create_order(p_user_id, p_total, p_items)`**: Creates a new order record. This procedure is designed to be the starting point of an order transaction.
-- **`add_order_item(...)`**: Adds a line item to an existing order.
+- **`add_product(pname, pdesc, pprice, pstock, p_image)`**: Adds a new product to the `products` table, including its name, description, price, stock quantity, and image filename.
+- **`create_order(p_user_id, p_total, p_items)`**: Creates a new order, adds the corresponding items to `order_items`, and decrements the stock for each product. This is an atomic transaction.
 - **`record_transaction(...)`**: Records a payment transaction and links it to an order.
 
 ### 2.3. Triggers
@@ -41,6 +39,7 @@ Triggers are used to enforce data integrity and automate logging.
 - **`prevent_negative_stock`**: Before a product's stock is updated, this trigger checks if the new quantity would be negative and, if so, raises an error to prevent the update.
 - **`prevent_negative_new_product`**: Before a new product is inserted, this trigger ensures its initial stock is not less than 1.
 - **`low_stock_alerts`**: After a product's stock is updated, if the new quantity is 3 or less, this trigger logs the product details into the `low_stock_products` table.
+- **`return_stock_on_cancellation`**: After an order's status is updated to `Cancelled`, this trigger automatically returns the quantities of the order items back to the main `products` stock.
 
 ## 3. COMMIT/ROLLBACK Implementation (Transaction Management)
 
